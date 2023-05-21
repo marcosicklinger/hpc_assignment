@@ -9,7 +9,7 @@
 #include <fstream>
 #include "utils.h"
 
-void* generate_random_life(int rows, int cols) {
+void *generate_random_life(int rows, int cols) {
     int life_size = rows * cols;
     auto *world = new unsigned char[life_size];
     srand((unsigned) time(nullptr));
@@ -43,7 +43,7 @@ void write_state(std::string &filename, const void *data, int height, int width)
     state.close();
 }
 
-unsigned char * read_state(std::string &filename) {
+unsigned char *read_state(std::string &filename) {
     std::ifstream life_img(filename, std::ios::binary);
     if (!life_img) {
         throw std::runtime_error("Error when trying to retrieve the life_img from file: " + std::string(filename));
