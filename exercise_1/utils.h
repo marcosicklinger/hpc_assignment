@@ -5,9 +5,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <vector>
-#include <cstdint>
-
 constexpr unsigned char ALIVE = 255;
 constexpr unsigned  char DEAD = 0;
 

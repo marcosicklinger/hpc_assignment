@@ -19,4 +19,6 @@ int main() {
         std::cout << static_cast<int>(uploaded_world[i]) << " ";
     }
     std::cout << std::endl;
+
+    delete[] uploaded_world;
 }
