@@ -21,4 +21,6 @@ int main() {
     std::cout << std::endl;
 
     delete[] uploaded_world;
+
+    return 0;
 }
