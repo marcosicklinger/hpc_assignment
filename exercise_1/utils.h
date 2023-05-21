@@ -10,7 +10,7 @@ constexpr unsigned char DEAD = 0;
 
 constexpr const char STATE_DIR[] = "../exercise_1/state";
 
-void* generate_random_life(int rows, int cols);
+void *generate_random_life(int rows, int cols);
 
 void make_directory(const char *directory);
 
