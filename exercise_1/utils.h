@@ -8,15 +8,17 @@
 #include <vector>
 #include <cstdint>
 
-#define ALIVE 255
-#define DEAD 0
+constexpr unsigned char ALIVE = 255;
+constexpr unsigned  char DEAD = 0;
 
-#define DIRECTORY "../exercise_1/state"
+constexpr const char STATE_DIR[] = "../exercise_1/state";
 
-void* generate_random_world(int rows, int cols);
+void* generate_random_life(int rows, int cols);
 
-void make_directory();
+void make_directory(const char *directory);
 
-void snapshot(int height, int width);
+void write_state(std::string &filename, const void *data, int height, int width);
+
+unsigned char * read_state(std::string &filename);
 
 #endif //UTILS_H

@@ -10,3 +10,5 @@
 /cmake-build-debug/
 # Idea
 /.idea/
+# Files
+/exercise_1/state/trial_0.pgm
