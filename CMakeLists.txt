@@ -10,4 +10,5 @@ add_executable(hpc_assignment
         exercise_1/utils.cpp
         exercise_1/utils.h
         exercise_1/game.cpp
-        exercise_1/Life.h)
+        exercise_1/Life.h
+        exercise_1/Life.cpp)
