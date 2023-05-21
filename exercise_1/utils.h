@@ -6,7 +6,7 @@
 #define UTILS_H
 
 constexpr unsigned char ALIVE = 255;
-constexpr unsigned  char DEAD = 0;
+constexpr unsigned char DEAD = 0;
 
 constexpr const char STATE_DIR[] = "../exercise_1/state";
 
