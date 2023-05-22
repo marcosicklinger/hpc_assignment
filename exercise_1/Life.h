@@ -11,12 +11,12 @@ class Life {
 
 public:
 
-    unsigned char *state = nullptr;
+    unsigned char *state = nullptr, *_state = nullptr;
     int rows, cols, size;
 
     Life(std::string &filename, int &_rows, int &_cols);
 
-    void transition(int &w) const;
+    void transition(int &c) const;
 
     void evolve();
 
