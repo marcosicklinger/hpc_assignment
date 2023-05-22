@@ -5,12 +5,19 @@
 #include "Life.h"
 #include "utils.h"
 
-Life::Life(std::string &filename, int &_rows, int &_cols): rows(_rows), cols(_cols) {
+Life::Life(std::string &filename, int &_rows, int &_cols): rows(_rows), cols(_cols), size(_rows*_cols) {
     state = read_state(filename);
 }
 
-void Life::transition(int &x, int &y) {}
+void Life::transition(int &w) const {
+
+}
 
 void Life::evolve() {}
+
+int Life::check_pbc(int &w) {
+    return 0;
+}
+
 
 

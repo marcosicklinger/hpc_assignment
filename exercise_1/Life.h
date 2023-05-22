@@ -12,15 +12,17 @@ class Life {
 public:
 
     unsigned char *state = nullptr;
-    int rows, cols;
+    int rows, cols, size;
 
     Life(std::string &filename, int &_rows, int &_cols);
 
-    void transition(int &x, int &y);
+    void transition(int &w) const;
 
     void evolve();
 
 private:
+
+    static int check_pbc(int &w);
 
 };
 
