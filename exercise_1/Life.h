@@ -16,13 +16,15 @@ public:
 
     Life(std::string &filename, int &_rows, int &_cols);
 
-    void life(int &_x, int &_y) const;
+    void intraLife(int &_x, int &_y) const;
+
+    void boundaryRowLife(int &_x, int &_y, unsigned char *bordering_row);
 
     void evolve();
 
 private:
 
-    static int check_pbc(int &x, int &y);
+    static int checkPBC(int &x, int &y);
 
 };
 

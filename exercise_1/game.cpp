@@ -7,15 +7,16 @@
 
 int main() {
     std::string filename = static_cast<std::string>(STATE_DIR) + "/" + "trial_0.pgm";
-    auto *world = generate_random_life(300, 300);
-    for (int i = 0; i < 9; i++) {
+    int k = 30;
+    auto *world = generate_random_life(k, k);
+    for (int i = 0; i < k; i++) {
         std::cout << static_cast<int>(static_cast<unsigned char *>(world)[i]) << " ";
     }
     std::cout << std::endl;
-    write_state(filename, world, 300, 300);
+    write_state(filename, world, k, k);
 
     auto *uploaded_world = read_state(filename);
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < k; i++) {
         std::cout << static_cast<int>(uploaded_world[i]) << " ";
     }
     std::cout << std::endl;
