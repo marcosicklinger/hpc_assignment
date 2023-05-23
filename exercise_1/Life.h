@@ -16,13 +16,13 @@ public:
 
     Life(std::string &filename, int &_rows, int &_cols);
 
-    void transition(int &c) const;
+    void life(int &_x, int &_y) const;
 
     void evolve();
 
 private:
 
-    static int check_pbc(int &w);
+    static int check_pbc(int &x, int &y);
 
 };
 
