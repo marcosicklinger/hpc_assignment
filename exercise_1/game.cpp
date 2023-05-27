@@ -15,7 +15,7 @@ int main() {
     std::cout << std::endl;
     write_state(filename, world, k, k);
 
-    auto *uploaded_world = read_state(filename);
+    auto *uploaded_world = read_state_from_pgm(filename);
     for (int i = 0; i < k; i++) {
         std::cout << static_cast<int>(uploaded_world[i]) << " ";
     }

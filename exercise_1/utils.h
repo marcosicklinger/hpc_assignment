@@ -16,6 +16,6 @@ void make_directory(const char *directory);
 
 void write_state(std::string &filename, const void *data, int height, int width);
 
-unsigned char *read_state(std::string &filename);
+unsigned char *read_state_from_pgm(std::string &filename);
 
 #endif //UTILS_H

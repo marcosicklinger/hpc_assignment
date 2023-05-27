@@ -9,22 +9,35 @@
 
 class Life {
 
-public:
+private:
 
-    unsigned char *state = nullptr, *_state = nullptr;
-    int rows, cols, size;
+    unsigned int lo;
+    unsigned int hi;
+    unsigned int rows, localRows, extendedLocalRows;
+    unsigned int cols, extendedLocalCols;
+    size_t lifeSize;
+    unsigned char *globalState;
+    unsigned char *localState;
+    unsigned char *localObservation;
+    unsigned char *extendedLocalObservation;
+
+    void computeHaloRows(); // to be computed for ordered evolution only
+
+    void computeHaloCols();
+
+    void computeHaloCorners();
+
+public:
 
     Life(std::string &filename, int &_rows, int &_cols);
 
-    void intraLife(int &_x, int &_y) const;
+    ~Life();
 
-    void boundaryRowLife(int &_x, int &_y, unsigned char *bordering_row);
+    void read_state(std::string &filename);
+
+    int living(int &_x, int &_y) const;
 
     void evolve();
-
-private:
-
-    static int checkPBC(int &x, int &y);
 
 };
 
