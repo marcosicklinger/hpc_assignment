@@ -21,7 +21,7 @@ private:
     unsigned char *localObs;
     unsigned char *localObsNext;
 
-    void computeHaloRows(); // to be computed for ordered evolution only
+    void computeHaloRows(); // to be computed for ordered staticEvolution only
 
     void computeHaloCols();
 
@@ -41,7 +41,9 @@ public:
 
     void orderedStep();
 
-    void evolution(int &time, int record_every);
+    void staticEvolution(int &time, int record_every);
+
+    void orderedEvolution(int &time, int record_every);
 
     unsigned char *getGlobalState();
 

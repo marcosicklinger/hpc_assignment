@@ -65,7 +65,7 @@ void Life::computeHaloCols() {
 void Life::computeHaloCorners() {
     localObs[0] = localObs[rows * localColsHalo + localColsHalo - 2];
     localObs[localRowsHalo - 1] = localObs[rows * localColsHalo + 1];
-    localObs[(localRowsHalo - 1) * localColsHalo] = localObs[2 * localColsHalo - 1];
+    localObs[(localRowsHalo - 1)*localColsHalo] = localObs[2 * localColsHalo - 1];
     localObs[localRowsHalo * localColsHalo - 1] = localObs[localColsHalo + 1];
 }
 
@@ -93,7 +93,17 @@ void Life::staticStep() {
 }
 
 void Life::orderedStep() {
-
+    for (unsigned int x = 1; x <= localRows; x++) {
+        for (unsigned int y = 1; y <= cols; y++) {
+            int local_population = census(x, y);
+            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
+            localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+            computeHaloRows();
+            computeHaloCols();
+            computeHaloCorners();
+        }
+    }
 }
 
 unsigned char *Life::getGlobalState() {
@@ -115,13 +125,17 @@ void Life::read_state(std::string &filename) {
 
 }
 
-void Life::evolution(int &time, int record_every = 1) {
+void Life::staticEvolution(int &time, int record_every = 1) {
     for (int age = 0; age < time; age++) {
         staticStep();
         if (age%record_every == 0) {
             freeze(age);
         }
     }
+}
+
+void Life::orderedEvolution(int & time, int record_every){
+
 }
 
 void Life::freeze(int &age) {
