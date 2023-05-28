@@ -37,7 +37,9 @@ public:
 
     int census(unsigned int &x, unsigned int &y) const;
 
-    void staticLifeStep();
+    void staticStep();
+
+    void orderedStep();
 
     void evolution(int &time, int record_every);
 

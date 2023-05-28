@@ -48,10 +48,17 @@ Life::~Life() {
     delete [] localObs;
 }
 
+void Life::computeHaloRows() {
+    for (unsigned int y = 1; y <= cols; y++) {
+        localObs[y] = localObs[localRows*localColsHalo + y];
+        localObs[(localRowsHalo - 1)*localColsHalo + y] = localObs[localColsHalo + y];
+    }
+}
+
 void Life::computeHaloCols() {
-    for (size_t x = 1; x < localRowsHalo - 1; x++) {
-        localObs[x * localColsHalo] = localObs[x * localColsHalo + localColsHalo - 2];
-        localObs[x * localColsHalo + localColsHalo - 1] = localObs[x * localColsHalo + 1];
+    for (unsigned int x = 1; x < localRowsHalo - 1; x++) {
+        localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];
+        localObs[x*localColsHalo + localColsHalo - 1] = localObs[x*localColsHalo + 1];
     }
 }
 
@@ -71,7 +78,7 @@ int Life::census(unsigned int &x, unsigned int &y) const {
            localObs[r_2 - 1] + localObs[r_2] + localObs[r_2 + 1];
 }
 
-void Life::staticLifeStep() {
+void Life::staticStep() {
     computeHaloCols();
     computeHaloCorners();
     for (unsigned int x = 1; x <= localRows; x++) {
@@ -83,6 +90,10 @@ void Life::staticLifeStep() {
         }
     }
     std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
+}
+
+void Life::orderedStep() {
+
 }
 
 unsigned char *Life::getGlobalState() {
@@ -106,7 +117,7 @@ void Life::read_state(std::string &filename) {
 
 void Life::evolution(int &time, int record_every = 1) {
     for (int age = 0; age < time; age++) {
-        staticLifeStep();
+        staticStep();
         if (age%record_every == 0) {
             freeze(age);
         }
