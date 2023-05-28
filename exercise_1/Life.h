@@ -11,15 +11,15 @@ class Life {
 
 private:
 
+    std::string name;
     unsigned int lo;
     unsigned int hi;
-    unsigned int rows, localRows, extendedLocalRows;
-    unsigned int cols, extendedLocalCols;
-    size_t lifeSize;
-    unsigned char *globalState;
+    unsigned int rows, localRows, localRowsHalo;
+    unsigned int cols, localColsHalo;
+    unsigned int lifeSize;
     unsigned char *localState;
-    unsigned char *localObservation;
-    unsigned char *extendedLocalObservation;
+    unsigned char *localObs;
+    unsigned char *localObsNext;
 
     void computeHaloRows(); // to be computed for ordered evolution only
 
@@ -29,15 +29,21 @@ private:
 
 public:
 
-    Life(std::string &filename, int &_rows, int &_cols);
+    Life(const std::string &filename, int &_rows, int &_cols);
 
     ~Life();
 
     void read_state(std::string &filename);
 
-    int living(int &_x, int &_y) const;
+    int census(unsigned int &x, unsigned int &y) const;
 
-    void evolve();
+    void staticLifeStep();
+
+    void evolution(int &time, int record_every);
+
+    unsigned char *getGlobalState();
+
+    void freeze(int &age);
 
 };
 

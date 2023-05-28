@@ -6,6 +6,7 @@
 #include "utils.h"
 
 int main() {
+    int a{};
     std::string filename = static_cast<std::string>(STATE_DIR) + "/" + "trial_0.pgm";
     int k = 30;
     auto *world = generate_random_life(k, k);
@@ -13,7 +14,7 @@ int main() {
         std::cout << static_cast<int>(static_cast<unsigned char *>(world)[i]) << " ";
     }
     std::cout << std::endl;
-    write_state(filename, world, k, k);
+    write_state(filename, reinterpret_cast<const char*>(world), k, k);
 
     auto *uploaded_world = read_state_from_pgm(filename);
     for (int i = 0; i < k; i++) {
@@ -23,7 +24,7 @@ int main() {
 
     delete[] uploaded_world;
 
-    std::cout << -1%10<< std::endl;
+    std::cout << -1%10 << ' ' << a << std::endl;
 
     return 0;
 }

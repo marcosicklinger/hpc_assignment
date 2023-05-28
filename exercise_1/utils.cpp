@@ -9,14 +9,14 @@
 #include <fstream>
 #include "utils.h"
 
-void *generate_random_life(int rows, int cols) {
+unsigned char * generate_random_life(int rows, int cols) {
     int life_size = rows * cols;
     auto *world = new unsigned char[life_size];
     srand((unsigned) time(nullptr));
     for (int i = 0; i < life_size; i++) {
         world[i] = rand()%2 ? (unsigned char) ALIVE : (unsigned char) DEAD;
     }
-    return reinterpret_cast<void*>(world);
+    return world;
 }
 
 void make_directory(const char *directory) {
@@ -30,7 +30,7 @@ void make_directory(const char *directory) {
     }
 }
 
-void write_state(std::string &filename, const void *data, int height, int width) {
+void write_state(std::string &filename, const char *data, unsigned int height, unsigned int width) {
     make_directory(STATE_DIR);
     std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     if (!state) {
@@ -39,11 +39,11 @@ void write_state(std::string &filename, const void *data, int height, int width)
     int max_gray_value{static_cast<int>(ALIVE)};
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
     unsigned int state_size = height*width;
-    state.write(reinterpret_cast<const char*>(data), state_size);
+    state.write(data, state_size);
     state.close();
 }
 
-unsigned char *read_state_from_pgm (std::string &filename) {
+unsigned char *read_state_from_pgm (const std::string &filename) {
     std::ifstream life_img(filename, std::ios::binary);
     if (!life_img) {
         throw std::runtime_error("Error when trying to retrieve the life_img from file: " + std::string(filename));
