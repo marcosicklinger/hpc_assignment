@@ -135,7 +135,15 @@ void Life::staticEvolution(int &time, int record_every = 1) {
 }
 
 void Life::orderedEvolution(int & time, int record_every){
-
+    computeHaloRows();
+    computeHaloCols();
+    computeHaloCorners();
+    for (int age = 0; age < time; age++) {
+        orderedStep();
+        if (age%record_every == 0) {
+                    freeze(age);
+        }
+    }
 }
 
 void Life::freeze(int &age) {
