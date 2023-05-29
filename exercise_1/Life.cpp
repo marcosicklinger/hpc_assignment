@@ -6,6 +6,7 @@
 #include <cassert>
 #include "Life.h"
 #include "utils.h"
+#include "consts.h"
 
 Life::Life(const std::string &filename, int &_rows, int &_cols):
 name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {

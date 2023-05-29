@@ -21,7 +21,7 @@ private:
     unsigned char *localObs;
     unsigned char *localObsNext;
 
-    void computeHaloRows(); // to be computed for ordered staticEvolution only
+    void computeHaloRows(); // to be computed for evolution staticEvolution only
 
     void computeHaloCols();
 
