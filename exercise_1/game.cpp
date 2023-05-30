@@ -4,8 +4,10 @@
 
 #include <iostream>
 #include <getopt.h>
+#include <filesystem>
 #include "utils.h"
 #include "consts.h"
+#include "Life.h"
 
 bool init = INIT;
 unsigned int rows = SIZE;
@@ -75,34 +77,34 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::cout << init << "\n"
-              << rows << "\n"
-              << cols << "\n"
-              << evolution << "\n"
-              << lifetime << "\n"
-              << record_every << "\n"
-              << filename << "\n"
-    << std::endl;
-
-    int a{};
-    filename = static_cast<std::string>(STATE_DIR) + "/" + filename;
-    int k = 30;
-    auto *world = generate_random_life(k, k);
-    for (int i = 0; i < k; i++) {
-        std::cout << static_cast<int>(static_cast<unsigned char *>(world)[i]) << " ";
+    if (init) {
+        filename = static_cast<std::string>(STATE_DIR) + "/" +
+                   filename + std::to_string(rows) + "x" + std::to_string(cols);
+        make_directory(filename);
+        auto *world = generate_random_life(rows, cols);
+        filename = filename + "/_";
+        write_state(filename, reinterpret_cast<const char*>(world), rows, cols);
+        delete [] world;
+        return 0;
     }
-    std::cout << std::endl;
-    write_state(filename, reinterpret_cast<const char*>(world), k, k);
 
-    auto *uploaded_world = read_state_from_pgm(filename);
-    for (int i = 0; i < k; i++) {
-        std::cout << static_cast<int>(uploaded_world[i]) << " ";
+    try {
+        if (!std::filesystem::exists(filename)) {
+            throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
+        }
+    } catch (const std::exception& exception) {
+        std::cerr << exception.what() << std::endl;
     }
-    std::cout << std::endl;
 
-    delete[] uploaded_world;
+    Life life = Life(filename, rows, cols);
 
-    std::cout << -1%10 << ' ' << a << std::endl;
+    if (!evolution) {
+        life.orderedEvolution(lifetime, record_every);
+
+        return 0;
+    }
+
+    life.staticEvolution(lifetime, record_every);
 
     return 0;
 }

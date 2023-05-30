@@ -21,7 +21,7 @@ private:
     unsigned char *localObs;
     unsigned char *localObsNext;
 
-    void computeHaloRows(); // to be computed for evolution staticEvolution only
+    void computeHaloRows();
 
     void computeHaloCols();
 
@@ -29,7 +29,7 @@ private:
 
 public:
 
-    Life(const std::string &filename, int &_rows, int &_cols);
+    Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols);
 
     ~Life();
 
@@ -41,9 +41,9 @@ public:
 
     void orderedStep();
 
-    void staticEvolution(int &time, int record_every);
+    void staticEvolution(unsigned int &lifetime, unsigned int &record_every);
 
-    void orderedEvolution(int &time, int record_every);
+    void orderedEvolution(unsigned int &lifetime, unsigned int &record_every);
 
     unsigned char *getGlobalState();
 

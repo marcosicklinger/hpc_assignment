@@ -4,11 +4,12 @@
 
 #include <cstring>
 #include <cassert>
+#include <iostream>
 #include "Life.h"
 #include "utils.h"
 #include "consts.h"
 
-Life::Life(const std::string &filename, int &_rows, int &_cols):
+Life::Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols):
 name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
     unsigned int n_procs = 1;
@@ -22,14 +23,17 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     localRows = rows/n_procs;
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
+    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
 
     localState = new unsigned char [hi - lo];
     localObs = new unsigned char [localRowsHalo * localColsHalo];
-    localObsNext = new unsigned char [hi - lo];
+    localObsNext = new unsigned char [localRowsHalo * localColsHalo];
+
 
     unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
     for (size_t i = 0; i < local_size; i++) {
         localState[i] = globalState[i]; // to be modified when parallelize code
+//        std::cout << static_cast<int>(globalState[i]) << std::endl;
     }
 
     // in the case of multiple processes: add mp routine for sending and receiving local states
@@ -37,6 +41,7 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     for (size_t x = 0; x < localRows; x++) {
         for(size_t y = 0; y < cols; y++) {
             localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
+//            std::cout << static_cast<int>(localObs[(x + 1) * localColsHalo + (y + 1)]) << std::endl;
         }
     }
 
@@ -71,26 +76,31 @@ void Life::computeHaloCorners() {
 }
 
 int Life::census(unsigned int &x, unsigned int &y) const {
-    unsigned int c = x*cols + y;
-    unsigned int r_1 = c - cols;
-    unsigned int r_2 = c + cols;
-    return localObs[r_1 - 1] + localObs[r_1] + localObs[r_1 + 1] +
-           localObs[c - 1]                    + localObs[c + 1] +
-           localObs[r_2 - 1] + localObs[r_2] + localObs[r_2 + 1];
+    int dead = localObs[(x - 1)*cols + (y - 1)] + localObs[(x - 1)*cols + y] + localObs[(x - 1)*cols + (y + 1)] +
+               localObs[x*cols + (y - 1)]                    + localObs[x*cols + (y + 1)] +
+               localObs[(x + 1)*cols + (y - 1)] + localObs[(x + 1)*cols + y] + localObs[(x + 1)*cols + (y + 1)];
+    return 8 - dead;
 }
 
 void Life::staticStep() {
+    computeHaloRows();
     computeHaloCols();
     computeHaloCorners();
+    int it = 0;
     for (unsigned int x = 1; x <= localRows; x++) {
         for (unsigned int y = 1; y <= cols; y++){
             int local_population = census(x, y);
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+            std::cout << it++ << " " << local_population << " " << lives << " " << static_cast<int>(localObsNext[x*localColsHalo + y]) << std::endl;
         }
     }
+//    for (int i = 0; i < localColsHalo*localRowsHalo; i++) {
+//            std::cout << static_cast<int>(localObs[i]) << std::endl;
+//        }
     std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
+
 }
 
 void Life::orderedStep() {
@@ -100,6 +110,7 @@ void Life::orderedStep() {
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+//            std::cout << static_cast<int>(localObs[x*localColsHalo + y]) << std::endl;
             computeHaloRows();
             computeHaloCols();
             computeHaloCorners();
@@ -110,6 +121,9 @@ void Life::orderedStep() {
 unsigned char *Life::getGlobalState() {
     // copy local observations (excluding halo data) into the local state for each process
     for (int x = 1; x <= localRows; x++) {
+//        for (int y = 1; y <= cols; y++) {
+//            localState[(x - 1)*cols + (y - 1)] = localObs[x*localColsHalo + y];
+//        }
         std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(unsigned char));
     }
 
@@ -126,22 +140,24 @@ void Life::read_state(std::string &filename) {
 
 }
 
-void Life::staticEvolution(int &time, int record_every = 1) {
-    for (int age = 0; age < time; age++) {
+void Life::staticEvolution(unsigned int &lifetime, unsigned int &record_every) {
+    ++lifetime;
+    for (int age = 0; age < lifetime; age++) {
         staticStep();
-        if (age%record_every == 0) {
+        if (age%record_every == 0 && age >= 0) {
             freeze(age);
         }
     }
 }
 
-void Life::orderedEvolution(int & time, int record_every){
+void Life::orderedEvolution(unsigned int &lifetime, unsigned int &record_every){
+    ++lifetime;
     computeHaloRows();
     computeHaloCols();
     computeHaloCorners();
-    for (int age = 0; age < time; age++) {
+    for (int age = 0; age < lifetime; age++) {
         orderedStep();
-        if (age%record_every == 0) {
+        if (age%record_every == 0 && age > 0) {
                     freeze(age);
         }
     }

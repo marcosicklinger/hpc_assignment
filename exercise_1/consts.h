@@ -7,8 +7,8 @@
 
 constexpr const char STATE_DIR[] = "../exercise_1/state";
 
-constexpr unsigned char ALIVE = 1;
-constexpr unsigned char DEAD = 0;
+constexpr unsigned char ALIVE = 0;
+constexpr unsigned char DEAD = 1;
 
 constexpr bool INIT = true;
 constexpr bool RUN = false;
