@@ -17,15 +17,15 @@ std::string filename = FILENAME;
 
 void printHelp() {
     std::cout <<
-                "-n:        initialization - no argument\n"
-                "-r:        run - no argument\n"
-                "-h:        height - int (>=100)\n"
-                "-w:        width - int (>=100)\n"
-                "-e:        evolution\n"
-                "-f:        source file\n"
-                "-n:        lifetime\n"
-                "-s:        record rate\n"
-                "-help:     help"
+                "Command line arguments options:\n"
+                "-i:        initialization      no argument\n"
+                "-r:        run                 no argument\n"
+                "-h:        height              unsigned int\n"
+                "-w:        width               unsigned int\n"
+                "-e:        evolution           int (0: ORDERED, else STATIC)\n"
+                "-f:        source file         string\n"
+                "-n:        lifetime            unsigned int\n"
+                "-s:        record rate         unsigned int\n"
     << std::endl;
     exit(1);
 }
@@ -69,15 +69,23 @@ int main(int argc, char *argv[]) {
             case 's':
                 record_every = std::stoi(optarg);
                 break;
-            case 'help':
             default:
                 printHelp();
                 break;
         }
     }
 
+    std::cout << init << "\n"
+              << rows << "\n"
+              << cols << "\n"
+              << evolution << "\n"
+              << lifetime << "\n"
+              << record_every << "\n"
+              << filename << "\n"
+    << std::endl;
+
     int a{};
-    filename = static_cast<std::string>(STATE_DIR) + filename;
+    filename = static_cast<std::string>(STATE_DIR) + "/" + filename;
     int k = 30;
     auto *world = generate_random_life(k, k);
     for (int i = 0; i < k; i++) {
