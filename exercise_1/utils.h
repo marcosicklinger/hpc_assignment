@@ -5,8 +5,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-constexpr const char STATE_DIR[] = "../exercise_1/state";
-
 unsigned char * generate_random_life(int rows, int cols);
 
 void make_directory(const char *directory);

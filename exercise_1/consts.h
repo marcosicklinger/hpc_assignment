@@ -5,6 +5,8 @@
 #ifndef CONSTS_H
 #define CONSTS_H
 
+constexpr const char STATE_DIR[] = "../exercise_1/state";
+
 constexpr unsigned char ALIVE = 1;
 constexpr unsigned char DEAD = 0;
 
