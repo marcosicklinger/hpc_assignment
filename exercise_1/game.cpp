@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "consts.h"
 #include "Life.h"
+#include <mpi.h>
 
 bool init = INIT;
 unsigned int rows = SIZE;
@@ -33,6 +34,8 @@ void printHelp() {
 }
 
 int main(int argc, char *argv[]) {
+    MPI_Init(&argc, &argv);
+
     option long_options[] = {
             {"initialization", no_argument, nullptr, 'i'},
             {"run", no_argument, nullptr, 'r'},

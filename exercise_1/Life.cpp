@@ -8,6 +8,8 @@
 #include "Life.h"
 #include "utils.h"
 #include "consts.h"
+#include <omp.h>
+#include <mpi.h>
 
 Life::Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols):
 name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
