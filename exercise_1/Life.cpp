@@ -23,7 +23,7 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     localRows = rows/n_procs;
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
-    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
+//    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
 
     localState = new unsigned char [hi - lo];
     localObs = new unsigned char [localRowsHalo * localColsHalo];
@@ -31,15 +31,15 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
 
     unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
-    for (size_t i = 0; i < local_size; i++) {
+    for (unsigned int i = 0; i < local_size; i++) {
         localState[i] = globalState[i]; // to be modified when parallelize code
 //        std::cout << static_cast<int>(globalState[i]) << std::endl;
     }
 
     // in the case of multiple processes: add mp routine for sending and receiving local states
 
-    for (size_t x = 0; x < localRows; x++) {
-        for(size_t y = 0; y < cols; y++) {
+    for (unsigned int x = 0; x < localRows; x++) {
+        for(unsigned int y = 0; y < cols; y++) {
             localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
 //            std::cout << static_cast<int>(localObs[(x + 1) * localColsHalo + (y + 1)]) << std::endl;
         }
@@ -62,7 +62,7 @@ void Life::computeHaloRows() {
 }
 
 void Life::computeHaloCols() {
-    for (unsigned int x = 1; x < localRowsHalo - 1; x++) {
+    for (unsigned int x = 1; x < localRows; x++) {
         localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];
         localObs[x*localColsHalo + localColsHalo - 1] = localObs[x*localColsHalo + 1];
     }
@@ -76,16 +76,14 @@ void Life::computeHaloCorners() {
 }
 
 int Life::census(unsigned int &x, unsigned int &y) const {
-    int dead = localObs[(x - 1)*cols + (y - 1)] + localObs[(x - 1)*cols + y] + localObs[(x - 1)*cols + (y + 1)] +
-               localObs[x*cols + (y - 1)]                    + localObs[x*cols + (y + 1)] +
-               localObs[(x + 1)*cols + (y - 1)] + localObs[(x + 1)*cols + y] + localObs[(x + 1)*cols + (y + 1)];
+    int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
+               localObs[x*localColsHalo + (y - 1)]                    + localObs[x*localColsHalo + (y + 1)] +
+               localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
+//    std::cout << static_cast<int>(localObs[(x + 1)*localColsHalo + (y - 1)]) << std::endl;
     return 8 - dead;
 }
 
 void Life::staticStep() {
-    computeHaloRows();
-    computeHaloCols();
-    computeHaloCorners();
     int it = 0;
     for (unsigned int x = 1; x <= localRows; x++) {
         for (unsigned int y = 1; y <= cols; y++){
@@ -93,13 +91,12 @@ void Life::staticStep() {
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
-            std::cout << it++ << " " << local_population << " " << lives << " " << static_cast<int>(localObsNext[x*localColsHalo + y]) << std::endl;
+//            std::cout << it++ << " " << local_population << " " << lives << " " << static_cast<int>(localObs[x*localColsHalo + y]) << " " << static_cast<int>(localObsNext[x*localColsHalo + y]) << std::endl;
         }
     }
 //    for (int i = 0; i < localColsHalo*localRowsHalo; i++) {
 //            std::cout << static_cast<int>(localObs[i]) << std::endl;
 //        }
-    std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
 
 }
 
@@ -143,8 +140,12 @@ void Life::read_state(std::string &filename) {
 void Life::staticEvolution(unsigned int &lifetime, unsigned int &record_every) {
     ++lifetime;
     for (int age = 0; age < lifetime; age++) {
+        computeHaloRows();
+        computeHaloCols();
+        computeHaloCorners();
         staticStep();
-        if (age%record_every == 0 && age >= 0) {
+        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
+        if (age%record_every == 0 && age > 0) {
             freeze(age);
         }
     }
