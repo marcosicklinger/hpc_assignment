@@ -139,13 +139,13 @@ void Life::read_state(std::string &filename) {
 
 void Life::staticEvolution(unsigned int &lifetime, unsigned int &record_every) {
     ++lifetime;
-    for (int age = 0; age < lifetime; age++) {
+    for (int age = 1; age < lifetime; age++) {
         computeHaloRows();
         computeHaloCols();
         computeHaloCorners();
         staticStep();
         std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
-        if (age%record_every == 0 && age > 0) {
+        if (age%record_every == 0) {
             freeze(age);
         }
     }
@@ -156,9 +156,9 @@ void Life::orderedEvolution(unsigned int &lifetime, unsigned int &record_every){
     computeHaloRows();
     computeHaloCols();
     computeHaloCorners();
-    for (int age = 0; age < lifetime; age++) {
+    for (int age = 1; age < lifetime; age++) {
         orderedStep();
-        if (age%record_every == 0 && age > 0) {
+        if (age%record_every == 0) {
                     freeze(age);
         }
     }
