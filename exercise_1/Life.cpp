@@ -39,13 +39,14 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     localObs = new unsigned char [localLifeSize];
     localObsNext = new unsigned char [localLifeSize];
 
-
-    unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
-    for (unsigned int i = 0; i < local_size; i++) {
-        localState[i] = globalState[i]; // to be modified when parallelize code
-//        std::cout << static_cast<int>(globalState[i]) << std::endl;
+    if (rank == 0) {
+        unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
+        for (unsigned int i = 0; i < local_size; i++) {
+            localState[i] = globalState[i]; // to be modified when parallelize code
+    //        std::cout << static_cast<int>(globalState[i]) << std::endl;
+        }
+        delete [] globalState;
     }
-
     // in the case of multiple processes: add mp routine for sending and receiving local states
 
     for (unsigned int x = 0; x < localRows; x++) {
@@ -54,8 +55,6 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 //            std::cout << static_cast<int>(localObs[(x + 1) * localColsHalo + (y + 1)]) << std::endl;
         }
     }
-
-    delete [] globalState;
 }
 
 Life::~Life() {
