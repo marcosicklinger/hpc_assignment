@@ -12,6 +12,8 @@ class Life {
 private:
 
     std::string name;
+    int n_procs;
+    int rank, lrank, urank;
     unsigned int lo;
     unsigned int hi;
     unsigned int rows, localRows, localRowsHalo;
