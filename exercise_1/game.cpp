@@ -34,6 +34,7 @@ void printHelp() {
 }
 
 int main(int argc, char *argv[]) {
+    MPI_Init(&argc, &argv);
 
     option long_options[] = {
             {"initialization", no_argument, nullptr, 'i'},
@@ -107,6 +108,8 @@ int main(int argc, char *argv[]) {
     }
 
     life.staticEvolution(lifetime, record_every);
+
+    MPI_Finalize();
 
     return 0;
 }
