@@ -16,7 +16,7 @@ private:
     unsigned int hi;
     unsigned int rows, localRows, localRowsHalo;
     unsigned int cols, localColsHalo;
-    unsigned int lifeSize;
+    unsigned int lifeSize, localLifeSize;
     unsigned char *localState;
     unsigned char *localObs;
     unsigned char *localObsNext;

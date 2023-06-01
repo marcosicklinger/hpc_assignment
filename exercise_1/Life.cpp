@@ -14,22 +14,31 @@
 Life::Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols):
 name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
-    unsigned int n_procs = 1;
+    int n_procs, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int lrank = (rank - 1 + n_procs) % n_procs;
+    int urank = (rank + 1) % n_procs;
+
     unsigned int local_size = lifeSize/n_procs;
-    unsigned int rank = 0;
+    assert(local_size > 0);
 
     lo = local_size*rank;
     hi = local_size*(rank + 1);
+    if (rank == n_procs - 1) {
+        hi = lifeSize;
+    }
     assert(lo < hi);
 
     localRows = rows/n_procs;
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
+    localLifeSize = localRowsHalo * localColsHalo;
 //    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
 
     localState = new unsigned char [hi - lo];
-    localObs = new unsigned char [localRowsHalo * localColsHalo];
-    localObsNext = new unsigned char [localRowsHalo * localColsHalo];
+    localObs = new unsigned char [localLifeSize];
+    localObsNext = new unsigned char [localLifeSize];
 
 
     unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
