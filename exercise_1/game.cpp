@@ -11,11 +11,11 @@
 #include <mpi.h>
 
 bool init = INIT;
-unsigned int rows = SIZE;
-unsigned int cols = SIZE;
+int rows = SIZE;
+int cols = SIZE;
 bool evolution = ORDERED;
-unsigned int lifetime = LIFETIME;
-unsigned int record_every = RECORD_EVERY;
+int lifetime = LIFETIME;
+int record_every = RECORD_EVERY;
 std::string filename = FILENAME;
 
 void printHelp() {

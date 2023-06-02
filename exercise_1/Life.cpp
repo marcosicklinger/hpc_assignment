@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <mpi.h>
 
-Life::Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols):
+Life::Life(const std::string &filename, int &_rows, int &_cols):
 name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
     MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
@@ -19,34 +19,42 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     lrank = (rank - 1 + n_procs) % n_procs;
     urank = (rank + 1) % n_procs;
 
-    unsigned int local_size = lifeSize/n_procs;
-    assert(local_size > 0);
-
-    lo = local_size*rank;
-    hi = local_size*(rank + 1);
-    if (rank == n_procs - 1) {
-        hi = lifeSize;
-    }
-    assert(lo < hi);
-
     localRows = rows/n_procs;
+    localSize = localRows * cols;
+    assert(localSize > 0);
+
+    lo = localRows*rank;
+        hi = localRows*(rank + 1);
+        if (rank == n_procs - 1) {
+            hi = rows;
+        }
+        assert(lo < hi);
+
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
-    localLifeSize = localRowsHalo * localColsHalo;
+    localSizeHalo = localRowsHalo * localColsHalo;
+
 //    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
 
-    localState = new unsigned char [hi - lo];
-    localObs = new unsigned char [localLifeSize];
-    localObsNext = new unsigned char [localLifeSize];
+    localState = new unsigned char [localSize];
+    localObs = new unsigned char [localSizeHalo];
+    localObsNext = new unsigned char [localSizeHalo];
 
     if (rank == 0) {
-        unsigned  char *globalState = read_state_from_pgm(filename); // should be done only on master process
-        for (unsigned int i = 0; i < local_size; i++) {
+        auto *globalState = new unsigned char [lifeSize];
+        read_state_from_pgm(globalState, filename); // should be done only on master process
+        for (unsigned int i = 0; i < localSize; i++) {
+//            std::cout << i << std::endl;
             localState[i] = globalState[i]; // to be modified when parallelize code
     //        std::cout << static_cast<int>(globalState[i]) << std::endl;
         }
+
+        for (int r = 1; r < n_procs; r++) {
+//            MPI_Send(globalState + r * localSize, localSize, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
+        }
         delete [] globalState;
     }
+
     // in the case of multiple processes: add mp routine for sending and receiving local states
 
     for (unsigned int x = 0; x < localRows; x++) {
@@ -55,6 +63,7 @@ name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 //            std::cout << static_cast<int>(localObs[(x + 1) * localColsHalo + (y + 1)]) << std::endl;
         }
     }
+//
 }
 
 Life::~Life() {
@@ -146,7 +155,7 @@ void Life::read_state(std::string &filename) {
 
 }
 
-void Life::staticEvolution(unsigned int &lifetime, unsigned int &record_every) {
+void Life::staticEvolution(int &lifetime, int &record_every) {
     ++lifetime;
     for (int age = 1; age < lifetime; age++) {
         computeHaloRows();
@@ -160,7 +169,7 @@ void Life::staticEvolution(unsigned int &lifetime, unsigned int &record_every) {
     }
 }
 
-void Life::orderedEvolution(unsigned int &lifetime, unsigned int &record_every){
+void Life::orderedEvolution(int &lifetime, int &record_every){
     ++lifetime;
     computeHaloRows();
     computeHaloCols();

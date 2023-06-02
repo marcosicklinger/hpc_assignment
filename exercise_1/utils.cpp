@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "consts.h"
 
-unsigned char * generate_random_life(unsigned int &rows, unsigned int &cols) {
+unsigned char * generate_random_life(int &rows, int &cols) {
     int life_size = rows * cols;
     auto *world = new unsigned char[life_size];
     srand((unsigned) time(nullptr));
@@ -31,7 +31,7 @@ void make_directory(const std::string &directory) {
     }
 }
 
-void write_state(std::string &filename, const char *data, unsigned int &height, unsigned int &width) {
+void write_state(std::string &filename, const char *data, int &height, int &width) {
     std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
@@ -47,16 +47,14 @@ void write_state(std::string &filename, const char *data, unsigned int &height, 
     state.close();
 }
 
-unsigned char *read_state_from_pgm (const std::string &filename) {
+void read_state_from_pgm (unsigned char *dest, const std::string &filename) {
     std::ifstream life_img(filename, std::ios::binary);
     int height, width, max_gray_value;
     std::string format;
     life_img >> format >> width >> height >> max_gray_value;
-    auto *state = new unsigned char[height*width];
     life_img.ignore();
-    life_img.read(reinterpret_cast<char*>(state), height*width);
+    life_img.read(reinterpret_cast<char*>(dest), height*width);
     life_img.close();
-    return state;
 }
 
 

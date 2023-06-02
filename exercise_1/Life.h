@@ -14,11 +14,11 @@ private:
     std::string name;
     int n_procs;
     int rank, lrank, urank;
-    unsigned int lo;
-    unsigned int hi;
-    unsigned int rows, localRows, localRowsHalo;
-    unsigned int cols, localColsHalo;
-    unsigned int lifeSize, localLifeSize;
+    int lo;
+    int hi;
+    int rows, localRows, localRowsHalo;
+    int cols, localColsHalo;
+    int lifeSize, localSize, localSizeHalo;
     unsigned char *localState;
     unsigned char *localObs;
     unsigned char *localObsNext;
@@ -31,7 +31,7 @@ private:
 
 public:
 
-    Life(const std::string &filename, unsigned int &_rows, unsigned int &_cols);
+    Life(const std::string &filename, int &_rows, int &_cols);
 
     ~Life();
 
@@ -43,9 +43,9 @@ public:
 
     void orderedStep();
 
-    void staticEvolution(unsigned int &lifetime, unsigned int &record_every);
+    void staticEvolution(int &lifetime, int &record_every);
 
-    void orderedEvolution(unsigned int &lifetime, unsigned int &record_every);
+    void orderedEvolution(int &lifetime, int &record_every);
 
     unsigned char *getGlobalState();
 
