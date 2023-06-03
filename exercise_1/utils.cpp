@@ -31,7 +31,7 @@ void make_directory(const std::string &directory) {
     }
 }
 
-void write_state(std::string &filename, const char *data, int &height, int &width) {
+void write_state(std::string &filename, void *data, int &height, int &width) {
     std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
@@ -43,7 +43,7 @@ void write_state(std::string &filename, const char *data, int &height, int &widt
     int max_gray_value{static_cast<int>(DEAD)};
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
     unsigned int state_size = height*width;
-    state.write(data, state_size);
+    state.write(reinterpret_cast<const char*>(data), state_size);
     state.close();
 }
 

@@ -11,11 +11,10 @@ class Life {
 
 private:
 
-    std::string name;
-    int n_procs;
-    int rank, lrank, urank;
-    int lo;
-    int hi;
+    std::string loc;
+    int lo, hi;
+    int loRow, hiRow;
+    int loRank, upRank;
     int rows, localRows, localRowsHalo;
     int cols, localColsHalo;
     int lifeSize, localSize, localSizeHalo;
@@ -31,7 +30,7 @@ private:
 
 public:
 
-    Life(const std::string &filename, int &_rows, int &_cols);
+    Life(std::string filename, int &_rows, int &_cols);
 
     ~Life();
 
@@ -51,6 +50,21 @@ public:
 
     void freeze(int &age);
 
+    [[nodiscard]] int getHi() const { return lo; }
+
+    [[nodiscard]] int getLo() const{ return lo; };
+
+    [[nodiscard]] int getLocalSize() const{ return localSize; };
+
+    [[nodiscard]] int getLifeSize() const{ return lifeSize; };
+
+    unsigned char &operator[](int globalIdx);
+
+    void initialize(void* data);
+
+    void initializeObs();
+
+    void haloExchange();
 };
 
 

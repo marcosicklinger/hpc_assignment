@@ -5,64 +5,54 @@
 #include <cstring>
 #include <cassert>
 #include <iostream>
+#include <utility>
 #include "Life.h"
 #include "utils.h"
 #include "consts.h"
 #include <omp.h>
 #include <mpi.h>
 
-Life::Life(const std::string &filename, int &_rows, int &_cols):
-name(filename), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
+Life::Life(std::string filename, int &_rows, int &_cols):
+loc(std::move(filename)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
+    int n_procs;
+    int rank;
     MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    lrank = (rank - 1 + n_procs) % n_procs;
-    urank = (rank + 1) % n_procs;
+    loRank = (rank - 1 + n_procs) % n_procs;
+    upRank = (rank + 1) % n_procs;
 
     localRows = rows/n_procs;
     localSize = localRows * cols;
-    assert(localSize > 0);
-
-    lo = localRows*rank;
-        hi = localRows*(rank + 1);
-        if (rank == n_procs - 1) {
-            hi = rows;
+    lo = localSize*rank;
+    hi = localSize*(rank + 1);
+    loRow = localRows*rank;
+    hiRow = localRows*(rank + 1);
+    if (rank == n_procs - 1) {
+            localRows += rows%n_procs;
+            hi = lifeSize;
+            hiRow = rows;
         }
-        assert(lo < hi);
+
+    assert(localSize > 0);
+    assert(lo < hi);
+    assert(loRow < hiRow);
+    assert((hiRow - loRow)*cols == hi - lo);
 
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
     localSizeHalo = localRowsHalo * localColsHalo;
 
-//    std::cout << localRowsHalo << " " << localColsHalo << std::endl;
-
     localState = new unsigned char [localSize];
     localObs = new unsigned char [localSizeHalo];
     localObsNext = new unsigned char [localSizeHalo];
 
-    if (rank == 0) {
-        auto *globalState = new unsigned char [lifeSize];
-        read_state_from_pgm(globalState, filename); // should be done only on master process
-        for (unsigned int i = 0; i < localSize; i++) {
-//            std::cout << i << std::endl;
-            localState[i] = globalState[i]; // to be modified when parallelize code
-    //        std::cout << static_cast<int>(globalState[i]) << std::endl;
-        }
-
-        for (int r = 1; r < n_procs; r++) {
+//        for (int r = 1; r < n_procs; r++) {
 //            MPI_Send(globalState + r * localSize, localSize, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
-        }
-        delete [] globalState;
-    }
+//        delete [] globalState;
+//    }
 
     // in the case of multiple processes: add mp routine for sending and receiving local states
-
-    for (unsigned int x = 0; x < localRows; x++) {
-        for(unsigned int y = 0; y < cols; y++) {
-            localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
-//            std::cout << static_cast<int>(localObs[(x + 1) * localColsHalo + (y + 1)]) << std::endl;
-        }
-    }
 //
 }
 
@@ -183,9 +173,37 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
 }
 
 void Life::freeze(int &age) {
-    auto *state = reinterpret_cast<const char*>(getGlobalState());
-    std::string filename = name + std::to_string(age);
+    auto *state = getGlobalState();
+    std::string filename = loc + std::to_string(age);
     write_state(filename, state, rows, cols);
 
     delete [] state;
+}
+
+unsigned char& Life::operator[](int globalIdx){
+    assert(globalIdx >= lo && globalIdx < hi);
+    return localState[globalIdx - lo];
+}
+
+void Life::initializeObs(){
+    for (unsigned int x = 0; x < localRows; x++) {
+        for(unsigned int y = 0; y < cols; y++) {
+            localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
+        }
+    }
+
+}
+void Life::initialize(void *data){
+    std::memcpy(localState, reinterpret_cast<unsigned char*>(data) + loRow*cols, (hi - lo)*sizeof(unsigned char));
+    initializeObs();
+}
+
+void Life::haloExchange (){
+    ompi_status_public_t status1, status2;
+    MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, upRank, 0,
+                 localObs, localColsHalo, MPI_UNSIGNED_CHAR, loRank, 0,
+                 MPI_COMM_WORLD, &status1);
+    MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, loRank, 1,
+                 localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, upRank, 1,
+                 MPI_COMM_WORLD, &status2);
 }

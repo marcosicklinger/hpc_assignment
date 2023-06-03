@@ -18,7 +18,7 @@ int lifetime = LIFETIME;
 int record_every = RECORD_EVERY;
 std::string filename = FILENAME;
 
-void printHelp() {
+void print_help() {
     std::cout <<
                 "Command line arguments options:\n"
                 "-i:        initialization      no argument\n"
@@ -33,19 +33,17 @@ void printHelp() {
     exit(1);
 }
 
-int main(int argc, char *argv[]) {
-    MPI_Init(&argc, &argv);
-
+void get_args(int argc, char *argv[]) {
     option long_options[] = {
-            {"initialization", no_argument, nullptr, 'i'},
-            {"run", no_argument, nullptr, 'r'},
-            {"height", required_argument, nullptr, 'h'},
-            {"width", required_argument, nullptr, 'w'},
-            {"evolution", required_argument, nullptr, 'e'},
-            {"source file", required_argument, nullptr, 'f'},
-            {"lifetime", required_argument, nullptr, 'n'},
-            {"record rate", required_argument, nullptr, 's'},
-            {nullptr}
+                {"initialization", no_argument, nullptr, 'i'},
+                {"run", no_argument, nullptr, 'r'},
+                {"height", required_argument, nullptr, 'h'},
+                {"width", required_argument, nullptr, 'w'},
+                {"evolution", required_argument, nullptr, 'e'},
+                {"source file", required_argument, nullptr, 'f'},
+                {"lifetime", required_argument, nullptr, 'n'},
+                {"record rate", required_argument, nullptr, 's'},
+                {nullptr}
     };
     int arg;
     int opt_idx = 0;
@@ -75,39 +73,53 @@ int main(int argc, char *argv[]) {
                 record_every = std::stoi(optarg);
                 break;
             default:
-                printHelp();
+                print_help();
                 break;
         }
     }
+}
+
+int main(int argc, char *argv[]) {
+    MPI_Init(&argc, &argv);
+
+    get_args(argc, argv);
+
+    std::string directory = static_cast<std::string>(STATE_DIR) + "/life" +
+                            std::to_string(rows) + "x" + std::to_string(cols) + "/";
 
     if (init) {
-        filename = static_cast<std::string>(STATE_DIR) + "/" +
-                   filename + std::to_string(rows) + "x" + std::to_string(cols);
-        make_directory(filename);
+        std::string instance_name = directory + "0";
+        make_directory(directory);
         auto *world = generate_random_life(rows, cols);
-        filename = filename + "/_";
-        write_state(filename, reinterpret_cast<const char*>(world), rows, cols);
+        write_state(instance_name, world, rows, cols);
+
         delete [] world;
+
         return 0;
     }
 
     try {
-        if (!std::filesystem::exists(filename)) {
+        if (!std::filesystem::exists(directory + filename)) {
             throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
         }
     } catch (const std::exception& exception) {
         std::cerr << exception.what() << std::endl;
     }
 
-    Life life = Life(filename, rows, cols);
+    Life life = Life(directory, rows, cols);
+    int life_size = rows;
+
+    auto *globalState = new unsigned char [life_size];
+    filename = directory + filename;
+    read_state_from_pgm(globalState, filename);
+    life.initialize(globalState);
+    delete [] globalState;
 
     if (!evolution) {
         life.orderedEvolution(lifetime, record_every);
-
-        return 0;
+    } else {
+        life.staticEvolution(lifetime, record_every);
     }
-
-    life.staticEvolution(lifetime, record_every);
 
     MPI_Finalize();
 
