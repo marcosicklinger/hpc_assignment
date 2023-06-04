@@ -81,13 +81,15 @@ void get_args(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     get_args(argc, argv);
 
     std::string directory = static_cast<std::string>(STATE_DIR) + "/life" +
                             std::to_string(rows) + "x" + std::to_string(cols) + "/";
 
-    if (init) {
+    if (init && rank == 0) {
         std::string instance_name = directory + "0";
         make_directory(directory);
         auto *world = generate_random_life(rows, cols);
@@ -95,6 +97,7 @@ int main(int argc, char *argv[]) {
 
         delete [] world;
 
+        MPI_Finalize();
         return 0;
     }
 
@@ -106,14 +109,7 @@ int main(int argc, char *argv[]) {
         std::cerr << exception.what() << std::endl;
     }
 
-    Life life = Life(directory, rows, cols);
-    int life_size = rows;
-
-    auto *globalState = new unsigned char [life_size];
-    filename = directory + filename;
-    read_state_from_pgm(globalState, filename);
-    life.initialize(globalState);
-    delete [] globalState;
+    Life life = Life(directory, filename, rows, cols);
 
     if (!evolution) {
         life.orderedEvolution(lifetime, record_every);

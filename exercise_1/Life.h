@@ -30,13 +30,13 @@ private:
 
 public:
 
-    Life(std::string filename, int &_rows, int &_cols);
+    Life(std::string location, std::string filename, int &_rows, int &_cols);
 
     ~Life();
 
     void read_state(std::string &filename);
 
-    int census(unsigned int &x, unsigned int &y) const;
+    [[nodiscard]] unsigned char census(int x, int y) const;
 
     void staticStep();
 

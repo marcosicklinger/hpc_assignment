@@ -12,8 +12,8 @@
 #include <omp.h>
 #include <mpi.h>
 
-Life::Life(std::string filename, int &_rows, int &_cols):
-loc(std::move(filename)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
+Life::Life(std::string location, std::string filename, int &_rows, int &_cols):
+loc(std::move(location)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
     int n_procs;
     int rank;
@@ -21,6 +21,7 @@ loc(std::move(filename)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     loRank = (rank - 1 + n_procs) % n_procs;
     upRank = (rank + 1) % n_procs;
+//    std::cout << rank << " " << loRank << " " << upRank << std::endl;
 
     localRows = rows/n_procs;
     localSize = localRows * cols;
@@ -29,10 +30,11 @@ loc(std::move(filename)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     loRow = localRows*rank;
     hiRow = localRows*(rank + 1);
     if (rank == n_procs - 1) {
-            localRows += rows%n_procs;
-            hi = lifeSize;
-            hiRow = rows;
-        }
+        localRows += rows%n_procs;
+        hi = lifeSize;
+        hiRow = rows;
+    }
+//    std::cout << rank << " " << localRows << " " << std::endl;
 
     assert(localSize > 0);
     assert(lo < hi);
@@ -47,6 +49,17 @@ loc(std::move(filename)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     localObs = new unsigned char [localSizeHalo];
     localObsNext = new unsigned char [localSizeHalo];
 
+    if (rank == 0) {
+        auto *globalState = new unsigned char [lifeSize];
+        filename = loc + filename;
+        read_state_from_pgm(globalState, filename);
+
+        // send to processes the various parts (in their local states)
+        // then initializes their observations
+
+        initialize(globalState);
+        delete [] globalState;
+    }
 //        for (int r = 1; r < n_procs; r++) {
 //            MPI_Send(globalState + r * localSize, localSize, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
 //        delete [] globalState;
@@ -70,7 +83,7 @@ void Life::computeHaloRows() {
 }
 
 void Life::computeHaloCols() {
-    for (unsigned int x = 1; x < localRows; x++) {
+    for (unsigned int x = 0; x < localRowsHalo; x++) {
         localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];
         localObs[x*localColsHalo + localColsHalo - 1] = localObs[x*localColsHalo + 1];
     }
@@ -83,34 +96,27 @@ void Life::computeHaloCorners() {
     localObs[localRowsHalo * localColsHalo - 1] = localObs[localColsHalo + 1];
 }
 
-int Life::census(unsigned int &x, unsigned int &y) const {
-    int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
+unsigned char Life::census(int x, int y) const {
+    unsigned char dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
                localObs[x*localColsHalo + (y - 1)]                    + localObs[x*localColsHalo + (y + 1)] +
                localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
 //    std::cout << static_cast<int>(localObs[(x + 1)*localColsHalo + (y - 1)]) << std::endl;
-    return 8 - dead;
+    return (8 - dead);
 }
 
 void Life::staticStep() {
-    int it = 0;
-    for (unsigned int x = 1; x <= localRows; x++) {
-        for (unsigned int y = 1; y <= cols; y++){
-            int local_population = census(x, y);
-            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
+    for (int x = 1; x <= localRows; x++) {
+        for (int y = 1; y <= cols; y++){
+            unsigned char local_population = census(x, y);
+            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) || (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
-//            std::cout << it++ << " " << local_population << " " << lives << " " << static_cast<int>(localObs[x*localColsHalo + y]) << " " << static_cast<int>(localObsNext[x*localColsHalo + y]) << std::endl;
         }
     }
-//    for (int i = 0; i < localColsHalo*localRowsHalo; i++) {
-//            std::cout << static_cast<int>(localObs[i]) << std::endl;
-//        }
-
 }
 
 void Life::orderedStep() {
-    for (unsigned int x = 1; x <= localRows; x++) {
-        for (unsigned int y = 1; y <= cols; y++) {
+    for (int x = 1; x <= localRows; x++) {
+        for (int y = 1; y <= cols; y++) {
             int local_population = census(x, y);
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
@@ -118,7 +124,7 @@ void Life::orderedStep() {
 //            std::cout << static_cast<int>(localObs[x*localColsHalo + y]) << std::endl;
             computeHaloRows();
             computeHaloCols();
-            computeHaloCorners();
+//            computeHaloCorners();
         }
     }
 }
@@ -148,7 +154,7 @@ void Life::read_state(std::string &filename) {
 void Life::staticEvolution(int &lifetime, int &record_every) {
     ++lifetime;
     for (int age = 1; age < lifetime; age++) {
-        computeHaloRows();
+        haloExchange();
         computeHaloCols();
         computeHaloCorners();
         staticStep();
@@ -163,7 +169,7 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
     ++lifetime;
     computeHaloRows();
     computeHaloCols();
-    computeHaloCorners();
+//    computeHaloCorners();
     for (int age = 1; age < lifetime; age++) {
         orderedStep();
         if (age%record_every == 0) {
@@ -193,6 +199,7 @@ void Life::initializeObs(){
     }
 
 }
+
 void Life::initialize(void *data){
     std::memcpy(localState, reinterpret_cast<unsigned char*>(data) + loRow*cols, (hi - lo)*sizeof(unsigned char));
     initializeObs();
