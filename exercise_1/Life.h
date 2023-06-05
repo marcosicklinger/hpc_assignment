@@ -12,6 +12,8 @@ class Life {
 private:
 
     std::string loc;
+    int n_procs;
+    int rank;
     int lo, hi;
     int loRow, hiRow;
     int loRank, upRank;
@@ -46,9 +48,7 @@ public:
 
     void orderedEvolution(int &lifetime, int &record_every);
 
-    unsigned char *getGlobalState();
-
-    void freeze(int &age);
+    void freezeGlobalState(int &age);
 
     [[nodiscard]] int getHi() const { return lo; }
 

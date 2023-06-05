@@ -15,8 +15,6 @@
 Life::Life(std::string location, std::string filename, int &_rows, int &_cols):
 loc(std::move(location)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
 
-    int n_procs;
-    int rank;
     MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     loRank = (rank - 1 + n_procs) % n_procs;
@@ -36,8 +34,8 @@ loc(std::move(location)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     }
 //    std::cout << rank << " " << localRows << " " << std::endl;
 
-    assert(localSize > 0);
     assert(lo < hi);
+    assert(localSize > 0 && localSize == hi - lo);
     assert(loRow < hiRow);
     assert((hiRow - loRow)*cols == hi - lo);
 
@@ -49,17 +47,37 @@ loc(std::move(location)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
     localObs = new unsigned char [localSizeHalo];
     localObsNext = new unsigned char [localSizeHalo];
 
+    int offset = (rows%n_procs)*cols;
     if (rank == 0) {
         auto *globalState = new unsigned char [lifeSize];
         filename = loc + filename;
         read_state_from_pgm(globalState, filename);
+        std::cout << "here1" << std::endl;
 
+        std::memcpy(localState, globalState, (hi - lo)*sizeof(unsigned char));
+
+        for (int r = 1; r < n_procs; r++) {
+            std::cout << r << std::endl;
+            int add_offset = r == n_procs - 1 ? 1 : 0;
+            MPI_Send(globalState + r*localSize, hi - lo + offset*add_offset,
+                     MPI_UNSIGNED_CHAR, r, 0,
+                     MPI_COMM_WORLD);
+        }
+        std::cout << "here2" << std::endl;
         // send to processes the various parts (in their local states)
         // then initializes their observations
-
-        initialize(globalState);
         delete [] globalState;
+        std::cout << "here3" << std::endl;
     }
+    if (rank != 0) {
+        MPI_Recv(localState, hi - lo,
+                 MPI_UNSIGNED_CHAR,
+                 0, 0,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    std::cout << "here4" << std::endl;
+    initializeObs();
+    MPI_Barrier(MPI_COMM_WORLD);
 //        for (int r = 1; r < n_procs; r++) {
 //            MPI_Send(globalState + r * localSize, localSize, MPI_UNSIGNED_CHAR, r, 0, MPI_COMM_WORLD);
 //        delete [] globalState;
@@ -129,22 +147,40 @@ void Life::orderedStep() {
     }
 }
 
-unsigned char *Life::getGlobalState() {
+void Life::freezeGlobalState(int &age) {
     // copy local observations (excluding halo data) into the local state for each process
     for (int x = 1; x <= localRows; x++) {
-//        for (int y = 1; y <= cols; y++) {
-//            localState[(x - 1)*cols + (y - 1)] = localObs[x*localColsHalo + y];
-//        }
         std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(unsigned char));
     }
 
-    auto *globalState = new unsigned char[rows*cols];
-    // for the other procs use mpi send/receive
-    // copy master process' portion into global state array
-    for (int x = 0; x < rows; x++) {
-        std::memcpy(globalState + x*cols, localState + x*cols, cols*sizeof(unsigned char));
+    unsigned char *globalState = nullptr;
+    int *recv_counts = nullptr;
+    int *displs = nullptr;
+
+    if (rank == 0) {
+        globalState = new unsigned char[rows*cols];
+        recv_counts = new int[n_procs];
+        displs = new int[n_procs];
+
+        int offset = (rows%n_procs)*cols;
+        for (int r = 0; r < n_procs; r++) {
+            int add_offset = r == n_procs - 1 ? 1 : 0;
+            recv_counts[r] = localSize + offset*add_offset;
+            displs[r] = localSize*r;
+        }
     }
-    return globalState;
+
+    MPI_Gatherv(localState, localSize,
+                MPI_UNSIGNED_CHAR,
+                globalState, recv_counts, displs,
+                MPI_UNSIGNED_CHAR,
+                0,
+                MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        std::string filename = loc + std::to_string(age);
+        write_state(filename, globalState, rows, cols);
+    }
 }
 
 void Life::read_state(std::string &filename) {
@@ -160,7 +196,7 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
         staticStep();
         std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
         if (age%record_every == 0) {
-            freeze(age);
+            freezeGlobalState(age);
         }
     }
 }
@@ -173,17 +209,9 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
     for (int age = 1; age < lifetime; age++) {
         orderedStep();
         if (age%record_every == 0) {
-                    freeze(age);
+            freezeGlobalState(age);
         }
     }
-}
-
-void Life::freeze(int &age) {
-    auto *state = getGlobalState();
-    std::string filename = loc + std::to_string(age);
-    write_state(filename, state, rows, cols);
-
-    delete [] state;
 }
 
 unsigned char& Life::operator[](int globalIdx){
