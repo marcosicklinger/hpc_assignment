@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+//#include <omp.h>
 #include "utils.h"
 #include "consts.h"
 
@@ -57,4 +58,18 @@ void read_state_from_pgm (unsigned char *dest, const std::string &filename) {
     life_img.close();
 }
 
+double mean(const double *values, int size) {
+    if (size == 0) {
+        return 0;
+    }
 
+    double sum = 0.0, norm = 1./size;
+
+    #pragma omp parallel for reduction(+:sum) schedule(static)
+    for (int n = 0; n < size; n++) {
+        sum += values[n];
+    }
+    sum *= norm;
+
+    return sum;
+}

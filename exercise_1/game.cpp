@@ -9,6 +9,7 @@
 #include "consts.h"
 #include "Life.h"
 #include <mpi.h>
+#include <omp.h>
 
 bool init = INIT;
 int rows = SIZE;
@@ -81,12 +82,14 @@ void get_args(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
-    int rank;
+
+    int rank, n_procs;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 
     get_args(argc, argv);
 
-    std::string directory = static_cast<std::string>(STATE_DIR) + "/life" +
+    std::string directory = static_cast<std::string>(STATE_DIR) + "/plife" +
                             std::to_string(rows) + "x" + std::to_string(cols) + "/";
 
     if (init && rank == 0) {
@@ -96,25 +99,49 @@ int main(int argc, char *argv[]) {
         write_state(instance_name, world, rows, cols);
 
         delete [] world;
-
-        MPI_Finalize();
-        return 0;
-    }
-
-    try {
-        if (!std::filesystem::exists(directory + filename)) {
-            throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
+    } else if (!init) {
+        try {
+            if (!std::filesystem::exists(directory + filename)) {
+                throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
+            }
+        } catch (const std::exception& exception) {
+            std::cerr << exception.what() << std::endl;
         }
-    } catch (const std::exception& exception) {
-        std::cerr << exception.what() << std::endl;
-    }
 
-    Life life = Life(directory, filename, rows, cols);
+        Life life = Life(directory, filename, rows, cols);
 
-    if (!evolution) {
-        life.orderedEvolution(lifetime, record_every);
-    } else {
-        life.staticEvolution(lifetime, record_every);
+        omp_set_num_threads(4);
+        if (!evolution) {
+            life.orderedEvolution(lifetime, record_every);
+        } else {
+            life.staticEvolution(lifetime, record_every);
+        }
+
+//        double *all_elapsed = nullptr;
+//        if (rank == 0) {
+//            all_elapsed = new double [n_procs];
+//        }
+        double this_elapsed = life.getElapsed();
+//        MPI_Gather(&this_elapsed, 1, MPI_DOUBLE,
+//                   all_elapsed + rank, 1, MPI_DOUBLE,
+//                   0, MPI_COMM_WORLD);
+//        if (rank == 0) {
+//            for (int i = 0; i < n_procs; i++) {
+//                std::cout << all_elapsed[i] << std::endl;
+//            }
+//            std::cout << "\t" << mean(all_elapsed, n_procs) << std::endl;
+//        }
+//        delete [] all_elapsed;
+
+        double elapsed_avg;
+        MPI_Reduce(&this_elapsed, &elapsed_avg, n_procs,
+                   MPI_DOUBLE, MPI_SUM,
+                   0,
+                   MPI_COMM_WORLD);
+        elapsed_avg /= n_procs;
+        if (rank == 0) {
+            std::cout << "\t" << elapsed_avg << std::endl;
+        }
     }
 
     MPI_Finalize();

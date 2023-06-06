@@ -13,4 +13,6 @@ void write_state(std::string &filename, void *data, int &height, int &width);
 
 void read_state_from_pgm(unsigned char *dest, const std::string &filename);
 
+double mean(const double *values, int size);
+
 #endif //UTILS_H

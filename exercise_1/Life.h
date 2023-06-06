@@ -23,6 +23,7 @@ private:
     unsigned char *localState;
     unsigned char *localObs;
     unsigned char *localObsNext;
+    double elapsed;
 
     void computeHaloRows();
 
@@ -65,6 +66,8 @@ public:
     void initializeObs();
 
     void haloExchange();
+
+    [[nodiscard]] double getElapsed() const { return elapsed; }
 };
 
 
