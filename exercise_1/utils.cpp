@@ -7,7 +7,6 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
-//#include <omp.h>
 #include "utils.h"
 #include "consts.h"
 

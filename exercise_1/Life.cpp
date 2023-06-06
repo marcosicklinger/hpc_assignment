@@ -9,9 +9,7 @@
 #include "Life.h"
 #include "utils.h"
 #include "consts.h"
-//#include <omp.h>
 #include <mpi.h>
-#include <chrono>
 
 Life::Life(std::string location, std::string filename, int &_rows, int &_cols):
 loc(std::move(location)), rows(_rows), cols(_cols), lifeSize(_rows*_cols) {
