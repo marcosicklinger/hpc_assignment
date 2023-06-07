@@ -57,6 +57,7 @@ void read_state_from_pgm (unsigned char *dest, const std::string &filename) {
     life_img.close();
 }
 
+
 double mean(const double *values, int size) {
     if (size == 0) {
         return 0;
@@ -71,4 +72,13 @@ double mean(const double *values, int size) {
     sum *= norm;
 
     return sum;
+}
+void write_time(std::string &filename, int n, double time){
+    std::ofstream ofile(filename,std::ios_base::out);
+    if (!ofile) {
+        ofile.open(filename);
+        ofile << "n" << "\t" << "time" << std::endl;
+    }
+    ofile << n << "\t" << time << std::endl;
+    ofile.close();
 }

@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <getopt.h>
 #include <filesystem>
 #include "utils.h"
@@ -93,7 +94,7 @@ int main(int argc, char *argv[]) {
                             std::to_string(rows) + "x" + std::to_string(cols) + "/";
 
     if (init && rank == 0) {
-        std::string instance_name = directory + "0";
+        std::string instance_name = directory + filename;
         make_directory(directory);
         auto *world = generate_random_life(rows, cols);
         write_state(instance_name, world, rows, cols);
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
 
         Life life = Life(directory, filename, rows, cols);
 
-        omp_set_num_threads(4);
+//        omp_set_num_threads(5);
         if (!evolution) {
             life.orderedEvolution(lifetime, record_every);
         } else {
@@ -139,8 +140,15 @@ int main(int argc, char *argv[]) {
                    0,
                    MPI_COMM_WORLD);
         elapsed_avg /= n_procs;
+
         if (rank == 0) {
-            std::cout << "\t" << elapsed_avg << std::endl;
+            make_directory(static_cast<std::string>(TMEASURE_DIR));
+            std::string tmeasure_directory = static_cast<std::string>(TMEASURE_DIR) + "/plife" +
+                                                 std::to_string(rows) + "x" + std::to_string(cols) + "/";
+            make_directory(tmeasure_directory);
+            std::string  tmeasure_filename = tmeasure_directory + "omp_scalability.txt";
+            int n_threads = omp_get_max_threads();
+            write_time(tmeasure_filename, n_threads, elapsed_avg);
         }
     }
 

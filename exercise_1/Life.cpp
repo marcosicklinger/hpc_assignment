@@ -87,14 +87,14 @@ Life::~Life() {
 }
 
 void Life::computeHaloRows() {
-    for (unsigned int y = 1; y <= cols; y++) {
+    for (int y = 1; y <= cols; y++) {
         localObs[y] = localObs[localRows*localColsHalo + y];
         localObs[(localRowsHalo - 1)*localColsHalo + y] = localObs[localColsHalo + y];
     }
 }
 
 void Life::computeHaloCols() {
-    for (unsigned int x = 0; x < localRowsHalo; x++) {
+    for (int x = 0; x < localRowsHalo; x++) {
         localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];
         localObs[x*localColsHalo + localColsHalo - 1] = localObs[x*localColsHalo + 1];
     }
@@ -222,8 +222,8 @@ unsigned char& Life::operator[](int globalIdx){
 }
 
 void Life::initializeObs(){
-    for (unsigned int x = 0; x < localRows; x++) {
-        for(unsigned int y = 0; y < cols; y++) {
+    for (int x = 0; x < localRows; x++) {
+        for(int y = 0; y < cols; y++) {
             localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
         }
     }

@@ -6,6 +6,7 @@
 #define CONSTS_H
 
 constexpr const char STATE_DIR[] = "../exercise_1/state";
+constexpr const char TMEASURE_DIR[] = "../exercise_1/time";
 
 constexpr unsigned char ALIVE = 0;
 constexpr unsigned char DEAD = 1;
