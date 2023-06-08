@@ -18,19 +18,21 @@ int cols = SIZE;
 bool evolution = ORDERED;
 int lifetime = LIFETIME;
 int record_every = RECORD_EVERY;
-std::string filename = FILENAME;
+std::string filename = static_cast<std::string>(FILENAME);
+std::string tmeasure_filename = static_cast<std::string>(TMEASURE_FILENAME);
 
 void print_help() {
     std::cout <<
                 "Command line arguments options:\n"
-                "-i:        initialization      no argument\n"
-                "-r:        run                 no argument\n"
-                "-h:        height              unsigned int\n"
-                "-w:        width               unsigned int\n"
-                "-e:        evolution           int (0: ORDERED, else STATIC)\n"
-                "-f:        source file         string\n"
-                "-n:        lifetime            unsigned int\n"
-                "-s:        record rate         unsigned int\n"
+                "-i:        initialization              no argument\n"
+                "-r:        run                         no argument\n"
+                "-h:        height                      positive int\n"
+                "-w:        width                       positive int\n"
+                "-e:        evolution                   int (0: ORDERED, else STATIC)\n"
+                "-f:        source file                 string\n"
+                "-n:        lifetime                    positive int\n"
+                "-s:        record rate                 positive int\n"
+//                "-tf        execution times record      string\n"
     << std::endl;
     exit(1);
 }
@@ -141,15 +143,17 @@ int main(int argc, char *argv[]) {
                    MPI_COMM_WORLD);
         elapsed_avg /= n_procs;
 
-        if (rank == 0) {
-            make_directory(static_cast<std::string>(TMEASURE_DIR));
-            std::string tmeasure_directory = static_cast<std::string>(TMEASURE_DIR) + "/plife" +
-                                                 std::to_string(rows) + "x" + std::to_string(cols) + "/";
-            make_directory(tmeasure_directory);
-            std::string  tmeasure_filename = tmeasure_directory + "omp_scalability.txt";
-            int n_threads = omp_get_max_threads();
-            write_time(tmeasure_filename, n_threads, elapsed_avg);
-        }
+        //            int n_threads = omp_get_max_threads();
+//        omp_set_num_threads(1);
+//        if (rank == 0) {
+//            make_directory(static_cast<std::string>(TMEASURE_DIR));
+//            std::string tmeasure_directory = "file.txt";
+//                    static_cast<std::string>(TMEASURE_DIR) + "/plife" +
+//                                             std::to_string(rows) + "x" + std::to_string(cols) + "/";
+//            make_directory(tmeasure_directory);
+//            tmeasure_filename = tmeasure_directory + tmeasure_filename;
+//            write_time(tmeasure_filename, n_threads, elapsed_avg);
+//        }
     }
 
     MPI_Finalize();

@@ -7,8 +7,8 @@ include_directories(.)
 include_directories(exercise_1)
 
 add_executable(hpc_assignment
-        exercise_1/utils.cpp
-        exercise_1/utils.h
-        exercise_1/game.cpp
-        exercise_1/Life.h
-        exercise_1/Life.cpp)
+        exercise_1/src/utils.cpp
+        exercise_1/src/utils.h
+        exercise_1/src/game.cpp
+        exercise_1/src/Life.h
+        exercise_1/src/Life.cpp)

@@ -73,8 +73,9 @@ double mean(const double *values, int size) {
 
     return sum;
 }
+
 void write_time(std::string &filename, int n, double time){
-    std::ofstream ofile(filename,std::ios_base::out);
+    std::ofstream ofile(filename,std::ios_base::out | std::ios::app);
     if (!ofile) {
         ofile.open(filename);
         ofile << "n" << "\t" << "time" << std::endl;
