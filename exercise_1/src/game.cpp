@@ -19,7 +19,7 @@ bool evolution = ORDERED;
 int lifetime = LIFETIME;
 int record_every = RECORD_EVERY;
 std::string filename = static_cast<std::string>(FILENAME);
-std::string tmeasure_filename = static_cast<std::string>(TMEASURE_FILENAME);
+std::string time_filename = static_cast<std::string>(TIME);
 
 void print_help() {
     std::cout <<
@@ -92,26 +92,22 @@ int main(int argc, char *argv[]) {
 
     get_args(argc, argv);
 
-    std::string directory = static_cast<std::string>(STATE_DIR) + "/plife" +
-                            std::to_string(rows) + "x" + std::to_string(cols) + "/";
-
     if (init && rank == 0) {
-        std::string instance_name = directory + filename;
-        make_directory(directory);
         auto *world = generate_random_life(rows, cols);
-        write_state(instance_name, world, rows, cols);
+        std::string instance = static_cast<std::string>(SNAPSHOT) + filename;
+        write_state(instance, world, rows, cols);
 
         delete [] world;
     } else if (!init) {
         try {
-            if (!std::filesystem::exists(directory + filename)) {
+            if (!std::filesystem::exists(SNAPSHOT + filename)) {
                 throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
             }
         } catch (const std::exception& exception) {
             std::cerr << exception.what() << std::endl;
         }
 
-        Life life = Life(directory, filename, rows, cols);
+        Life life = Life(SNAPSHOT, filename, rows, cols);
 
 //        omp_set_num_threads(5);
         if (!evolution) {
@@ -143,17 +139,10 @@ int main(int argc, char *argv[]) {
                    MPI_COMM_WORLD);
         elapsed_avg /= n_procs;
 
-        //            int n_threads = omp_get_max_threads();
-//        omp_set_num_threads(1);
-//        if (rank == 0) {
-//            make_directory(static_cast<std::string>(TMEASURE_DIR));
-//            std::string tmeasure_directory = "file.txt";
-//                    static_cast<std::string>(TMEASURE_DIR) + "/plife" +
-//                                             std::to_string(rows) + "x" + std::to_string(cols) + "/";
-//            make_directory(tmeasure_directory);
-//            tmeasure_filename = tmeasure_directory + tmeasure_filename;
-//            write_time(tmeasure_filename, n_threads, elapsed_avg);
-//        }
+        int n_threads = omp_get_max_threads();
+        if (rank == 0) {
+            write_time(time_filename, n_threads, elapsed_avg);
+        }
     }
 
     MPI_Finalize();

@@ -5,10 +5,12 @@
 #ifndef CONSTS_H
 #define CONSTS_H
 
-constexpr const char STATE_DIR[] = "./state";
+constexpr const char STATE_DIR[] = "./state/";
 constexpr const char TMEASURE_DIR[] = "./time";
 constexpr const char FILENAME[] = "life";
 constexpr const char TMEASURE_FILENAME[] = "tmeasure.txt";
+constexpr const char SNAPSHOT[] = "./snapshot/";
+constexpr const char TIME[] = "./time/chrono.txt";
 
 constexpr unsigned char ALIVE = 0;
 constexpr unsigned char DEAD = 1;
