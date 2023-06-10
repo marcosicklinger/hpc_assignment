@@ -1,7 +1,3 @@
-//
-// Created by marcosicklinger on 5/21/23.
-//
-
 #ifndef LIFE_H
 #define LIFE_H
 
@@ -14,8 +10,6 @@ private:
     std::string loc;
     int n_procs;
     int rank;
-    int lo, hi;
-    int loRow, hiRow;
     int loRank, upRank;
     int rows, localRows, localRowsHalo;
     int cols, localColsHalo;
@@ -23,21 +17,17 @@ private:
     unsigned char *localState;
     unsigned char *localObs;
     unsigned char *localObsNext;
-    double elapsed;
+    double elapsed = 0;
 
     void computeHaloRows();
 
     void computeHaloCols();
 
-    void computeHaloCorners();
+    public:
 
-public:
-
-    Life(std::string location, std::string filename, int &_rows, int &_cols);
+    Life(std::string location, std::string filename, int &_rows, int &_cols, int np, int rk);
 
     ~Life();
-
-    void read_state(std::string &filename);
 
     [[nodiscard]] unsigned char census(int x, int y) const;
 
@@ -50,18 +40,6 @@ public:
     void orderedEvolution(int &lifetime, int &record_every);
 
     void freezeGlobalState(int &age);
-
-    [[nodiscard]] int getHi() const { return lo; }
-
-    [[nodiscard]] int getLo() const{ return lo; };
-
-    [[nodiscard]] int getLocalSize() const{ return localSize; };
-
-    [[nodiscard]] int getLifeSize() const{ return lifeSize; };
-
-    unsigned char &operator[](int globalIdx);
-
-    void initialize(void* data);
 
     void initializeObs();
 

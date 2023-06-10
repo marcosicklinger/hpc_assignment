@@ -1,14 +1,10 @@
-//
-// Created by marcosicklinger on 5/20/23.
-//
-
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <fstream>
-#include "utils.h"
-#include "consts.h"
+#include "../include/utils.h"
+#include "../include/consts.h"
 
 unsigned char * generate_random_life(int &rows, int &cols) {
     int life_size = rows * cols;

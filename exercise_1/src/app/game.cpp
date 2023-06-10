@@ -1,18 +1,15 @@
-//
-// Created by marcosicklinger on 5/20/23.
-//
-
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
 #include <filesystem>
-#include "utils.h"
-#include "consts.h"
-#include "Life.h"
+#include "../include/utils.h"
+#include "../include/consts.h"
+#include "../include/Life.h"
 #include <mpi.h>
 #include <omp.h>
 
-bool init = INIT;
+bool init = false;
+bool run = false;
 int rows = SIZE;
 int cols = SIZE;
 bool evolution = ORDERED;
@@ -32,7 +29,7 @@ void print_help(int arg) {
                 "-f:        source file                 string\n"
                 "-n:        lifetime                    positive int\n"
                 "-s:        snapshot saving rate        positive int\n"
-                "-t:        exec times save path        string\n"
+                "-t:        exe times save path        string\n"
     << std::endl;
     exit(1);
 }
@@ -55,9 +52,10 @@ void get_args(int argc, char *argv[]) {
     while ((arg = getopt_long(argc, argv, "irh:w:e:f:n:s:t:", long_options, &opt_idx)) != -1) {
         switch (arg) {
             case 'i':
+                init = true;
                 break;
             case 'r':
-                init = RUN;
+                run = true;
                 break;
             case 'h':
                 rows = std::stoi(optarg);
@@ -88,6 +86,7 @@ void get_args(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+
     MPI_Init(&argc, &argv);
 
     int rank, n_procs;
@@ -102,39 +101,28 @@ int main(int argc, char *argv[]) {
         write_state(instance, world, rows, cols);
 
         delete [] world;
-    } else if (!init) {
-        try {
-            if (!std::filesystem::exists(SNAPSHOT + snapshot_filename)) {
-                throw std::runtime_error("Error when trying to open the file: " + snapshot_filename);
+    }
+
+    if (run) {
+        if (rank == 0) {
+            try {
+                if (!std::filesystem::exists(SNAPSHOT + snapshot_filename)) {
+                    throw std::runtime_error("Error when trying to open the file: " + snapshot_filename);
+                }
+            } catch (const std::exception& exception) {
+                std::cerr << exception.what() << std::endl;
             }
-        } catch (const std::exception& exception) {
-            std::cerr << exception.what() << std::endl;
         }
 
-        Life life = Life(SNAPSHOT, snapshot_filename, rows, cols);
+        Life life = Life(SNAPSHOT, snapshot_filename, rows, cols, n_procs, rank);
 
-//        omp_set_num_threads(5);
         if (!evolution) {
             life.orderedEvolution(lifetime, record_every);
         } else {
             life.staticEvolution(lifetime, record_every);
         }
 
-//        double *all_elapsed = nullptr;
-//        if (rank == 0) {
-//            all_elapsed = new double [n_procs];
-//        }
         double this_elapsed = life.getElapsed();
-//        MPI_Gather(&this_elapsed, 1, MPI_DOUBLE,
-//                   all_elapsed + rank, 1, MPI_DOUBLE,
-//                   0, MPI_COMM_WORLD);
-//        if (rank == 0) {
-//            for (int i = 0; i < n_procs; i++) {
-//                std::cout << all_elapsed[i] << std::endl;
-//            }
-//            std::cout << "\t" << mean(all_elapsed, n_procs) << std::endl;
-//        }
-//        delete [] all_elapsed;
 
         double elapsed_avg;
         MPI_Reduce(&this_elapsed, &elapsed_avg, n_procs,
@@ -145,8 +133,8 @@ int main(int argc, char *argv[]) {
 
         int n_threads = omp_get_max_threads();
         if (rank == 0) {
-            time_filename = static_cast<std::string>(TIME) + time_filename;
-            write_time(time_filename, n_threads, elapsed_avg);
+            std::string time_path = static_cast<std::string>(TIME) + time_filename;
+            write_time(time_path, n_threads, elapsed_avg);
         }
     }
 

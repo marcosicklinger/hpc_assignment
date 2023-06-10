@@ -11,4 +11,5 @@
 # Idea
 /.idea/
 # Files
-/exercise_1/state/trial_0.pgm
+/exercise_1/snapshot
+/exercise_1/time
