@@ -8,7 +8,7 @@
 constexpr const char STATE_DIR[] = "./state/";
 constexpr const char TMEASURE_DIR[] = "./time";
 constexpr const char FILENAME[] = "life";
-constexpr const char TMEASURE_FILENAME[] = "tmeasure.txt";
+constexpr const char TIME_DIR[] = "tmeasure.txt";
 constexpr const char SNAPSHOT[] = "./snapshot/";
 constexpr const char TIME[] = "./time/chrono.txt";
 

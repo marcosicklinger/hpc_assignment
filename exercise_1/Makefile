@@ -4,8 +4,8 @@ setup:
 	mkdir -p snapshot
 	mkdir -p time
 
-static: static.x
+static: src/static.x
 
-static.x: src/game.cpp src/Life.cpp src/utils.cpp
+src/static.x: src/game.cpp src/Life.cpp src/utils.cpp
 	mpiCC $(CXXFLAGS) -o $@ $^
 

@@ -18,11 +18,11 @@ int cols = SIZE;
 bool evolution = ORDERED;
 int lifetime = LIFETIME;
 int record_every = RECORD_EVERY;
-std::string filename = static_cast<std::string>(FILENAME);
-std::string time_filename = static_cast<std::string>(TIME);
+std::string snapshot_filename = "0";
+std::string time_filename = "chrono.txt";
 
-void print_help() {
-    std::cout <<
+void print_help(int arg) {
+    std::cout << arg << " not found.\n"
                 "Command line arguments options:\n"
                 "-i:        initialization              no argument\n"
                 "-r:        run                         no argument\n"
@@ -31,8 +31,8 @@ void print_help() {
                 "-e:        evolution                   int (0: ORDERED, else STATIC)\n"
                 "-f:        source file                 string\n"
                 "-n:        lifetime                    positive int\n"
-                "-s:        record rate                 positive int\n"
-//                "-tf        execution times record      string\n"
+                "-s:        snapshot saving rate        positive int\n"
+                "-t:        exec times save path        string\n"
     << std::endl;
     exit(1);
 }
@@ -46,12 +46,13 @@ void get_args(int argc, char *argv[]) {
                 {"evolution", required_argument, nullptr, 'e'},
                 {"source file", required_argument, nullptr, 'f'},
                 {"lifetime", required_argument, nullptr, 'n'},
-                {"record rate", required_argument, nullptr, 's'},
+                {"snapshot_saving_rate", required_argument, nullptr, 's'},
+                {"exec_times_save_path", required_argument, nullptr, 't'},
                 {nullptr}
     };
     int arg;
     int opt_idx = 0;
-    while ((arg = getopt_long(argc, argv, "irh:w:e:f:n:s:", long_options, &opt_idx)) != -1) {
+    while ((arg = getopt_long(argc, argv, "irh:w:e:f:n:s:t:", long_options, &opt_idx)) != -1) {
         switch (arg) {
             case 'i':
                 break;
@@ -68,7 +69,7 @@ void get_args(int argc, char *argv[]) {
                 evolution = std::stoi(optarg);
                 break;
             case 'f':
-                filename = optarg;
+                snapshot_filename = optarg;
                 break;
             case 'n':
                 lifetime = std::stoi(optarg);
@@ -76,8 +77,11 @@ void get_args(int argc, char *argv[]) {
             case 's':
                 record_every = std::stoi(optarg);
                 break;
+            case 't':
+                time_filename = optarg;
+                break;
             default:
-                print_help();
+                print_help(arg);
                 break;
         }
     }
@@ -94,20 +98,20 @@ int main(int argc, char *argv[]) {
 
     if (init && rank == 0) {
         auto *world = generate_random_life(rows, cols);
-        std::string instance = static_cast<std::string>(SNAPSHOT) + filename;
+        std::string instance = static_cast<std::string>(SNAPSHOT) + snapshot_filename;
         write_state(instance, world, rows, cols);
 
         delete [] world;
     } else if (!init) {
         try {
-            if (!std::filesystem::exists(SNAPSHOT + filename)) {
-                throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
+            if (!std::filesystem::exists(SNAPSHOT + snapshot_filename)) {
+                throw std::runtime_error("Error when trying to open the file: " + snapshot_filename);
             }
         } catch (const std::exception& exception) {
             std::cerr << exception.what() << std::endl;
         }
 
-        Life life = Life(SNAPSHOT, filename, rows, cols);
+        Life life = Life(SNAPSHOT, snapshot_filename, rows, cols);
 
 //        omp_set_num_threads(5);
         if (!evolution) {
@@ -141,6 +145,7 @@ int main(int argc, char *argv[]) {
 
         int n_threads = omp_get_max_threads();
         if (rank == 0) {
+            time_filename = static_cast<std::string>(TIME) + time_filename;
             write_time(time_filename, n_threads, elapsed_avg);
         }
     }
