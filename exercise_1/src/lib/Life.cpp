@@ -1,10 +1,12 @@
 #include <cstring>
-#include <cassert>
 #include <utility>
+#include <stdexcept>
+#include <mpi.h>
+#include <ostream>
+#include <iostream>
 #include "../include/Life.h"
 #include "../include/utils.h"
 #include "../include/consts.h"
-#include <mpi.h>
 
 Life::Life(std::string location, std::string filename, int &_rows, int &_cols, int np, int rk):
 loc(std::move(location)),
@@ -167,6 +169,13 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
 }
 
 void Life::orderedEvolution(int &lifetime, int &record_every){
+    try {
+        if (n_procs > 1) {
+            throw std::invalid_argument("To run the ordered evolution properly, the number of mpi processes must be equal to 1");
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cerr << e.what() << std::endl;
+    }
     ++lifetime;
     elapsed = -MPI_Wtime();
     computeHaloRows();
