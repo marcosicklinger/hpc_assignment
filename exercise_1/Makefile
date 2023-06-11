@@ -1,13 +1,13 @@
-CXXFLAGS := -O2 -Wall -fopenmp
+COMPILEFLAGS := -O2 -Wall -fopenmp
 
 setup:
 	mkdir -p snapshot
 	mkdir -p time
 
-static: src/static.x
+game: src/game.x
 
-src/static.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
-	mpiCC $(CXXFLAGS) -o $@ $^
+src/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
+	mpiCC $(COMPILEFLAGS) -o $@ $^
 
 clean: clean_exe clean_snapshot clean_time
 
