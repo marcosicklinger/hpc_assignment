@@ -2,7 +2,6 @@
 #include <utility>
 #include <stdexcept>
 #include <mpi.h>
-#include <omp.h>
 #include <ostream>
 #include <iostream>
 #include "../include/Life.h"

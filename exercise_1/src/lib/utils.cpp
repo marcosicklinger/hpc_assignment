@@ -16,17 +16,6 @@ unsigned char * generate_random_life(int &rows, int &cols) {
     return world;
 }
 
-void make_directory(const std::string &directory) {
-    if (!std::filesystem::exists(directory)) {
-        try {
-            std::filesystem::create_directory(directory);
-        }
-        catch (const std::exception& exception) {
-            std::cerr << exception.what() << std::endl;
-        }
-    }
-}
-
 void write_state(std::string &filename, void *data, int &height, int &width) {
     std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
@@ -53,22 +42,6 @@ void read_pgm_file (const std::string &filename, unsigned char *dest) {
     life_img.close();
 }
 
-
-double mean(const double *values, int size) {
-    if (size == 0) {
-        return 0;
-    }
-
-    double sum = 0.0, norm = 1./size;
-
-    #pragma omp parallel for reduction(+:sum) schedule(static)
-    for (int n = 0; n < size; n++) {
-        sum += values[n];
-    }
-    sum *= norm;
-
-    return sum;
-}
 
 void write_time(std::string &filename, int rows, int cols, int n, double time){
     std::ofstream ofile;

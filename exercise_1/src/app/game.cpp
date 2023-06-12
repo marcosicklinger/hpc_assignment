@@ -6,7 +6,6 @@
 #include "../include/consts.h"
 #include "../include/Life.h"
 #include <mpi.h>
-#include <omp.h>
 
 bool init = false;
 bool run = false;

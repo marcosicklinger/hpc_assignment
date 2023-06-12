@@ -44,8 +44,6 @@ private:
     void initializeObs();
 
     void haloExchange();
-
-    [[nodiscard]] double getElapsed() const { return elapsed; }
 };
 
 
