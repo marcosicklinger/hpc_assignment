@@ -2,6 +2,7 @@
 #include <utility>
 #include <stdexcept>
 #include <mpi.h>
+#include <omp.h>
 #include <ostream>
 #include <iostream>
 #include "../include/Life.h"
@@ -30,15 +31,15 @@ lifeSize(_rows*_cols) {
     localColsHalo = cols + 2;
     localSizeHalo = localRowsHalo * localColsHalo;
 
-    localState = new unsigned char [localSize]();
-    localObs = new unsigned char [localSizeHalo]();
-    localObsNext = new unsigned char [localSizeHalo]();
+    localState = new int [localSize]();
+    localObs = new int [localSizeHalo]();
+    localObsNext = new int [localSizeHalo]();
 
     int offset = (rows%n_procs)*cols;
     if (rank == 0) {
-        auto *globalState = new unsigned char [lifeSize];
+        auto *globalState = new int [lifeSize];
         filename = loc + filename;
-        read_state_from_pgm(globalState, filename);
+        read_state(filename, globalState, lifeSize);
 
         std::memcpy(localState, globalState, (localSize)*sizeof(unsigned char));
 
@@ -104,7 +105,7 @@ void Life::staticStep() {
 void Life::orderedStep() {
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++) {
-            int local_population = census(x, y);
+            unsigned char local_population = census(x, y);
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
@@ -155,17 +156,17 @@ void Life::freezeGlobalState(int &age) {
 
 void Life::staticEvolution(int &lifetime, int &record_every) {
     ++lifetime;
-    elapsed = -MPI_Wtime();
     for (int age = 1; age < lifetime; age++) {
         haloExchange();
         computeHaloCols();
         staticStep();
         std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
-        if (age%record_every == 0) {
-            freezeGlobalState(age);
-        }
+        #ifdef SSAVE
+            if (age%record_every == 0) {
+                freezeGlobalState(age);
+            }
+        #endif
     }
-    elapsed += MPI_Wtime();
 }
 
 void Life::orderedEvolution(int &lifetime, int &record_every){
@@ -177,16 +178,16 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
         std::cerr << e.what() << std::endl;
     }
     ++lifetime;
-    elapsed = -MPI_Wtime();
     computeHaloRows();
     computeHaloCols();
     for (int age = 1; age < lifetime; age++) {
         orderedStep();
-        if (age%record_every == 0) {
-            freezeGlobalState(age);
-        }
+        #ifdef SSAVE
+            if (age%record_every == 0) {
+                freezeGlobalState(age);
+            }
+        #endif
     }
-    elapsed += MPI_Wtime();
 }
 
 void Life::initializeObs(){

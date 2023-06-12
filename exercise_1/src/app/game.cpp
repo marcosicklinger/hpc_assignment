@@ -116,26 +116,32 @@ int main(int argc, char *argv[]) {
 
         Life life = Life(SNAPSHOT, snapshot_filename, rows, cols, n_procs, rank);
 
+        double this_elapsed;
         if (!evolution) {
+            this_elapsed = -MPI_Wtime();
             life.orderedEvolution(lifetime, record_every);
+            this_elapsed += MPI_Wtime();
         } else {
+            this_elapsed = -MPI_Wtime();
             life.staticEvolution(lifetime, record_every);
+            this_elapsed += MPI_Wtime();
         }
 
-        double this_elapsed = life.getElapsed();
+        #ifdef TSAVE
+            double elapsed_avg;
+            MPI_Reduce(&this_elapsed, &elapsed_avg, n_procs,
+                       MPI_DOUBLE, MPI_SUM,
+                       0,
+                       MPI_COMM_WORLD);
+            elapsed_avg /= n_procs;
 
-        double elapsed_avg;
-        MPI_Reduce(&this_elapsed, &elapsed_avg, n_procs,
-                   MPI_DOUBLE, MPI_SUM,
-                   0,
-                   MPI_COMM_WORLD);
-        elapsed_avg /= n_procs;
-
-        int n_threads = omp_get_max_threads();
-        if (rank == 0) {
-            std::string time_path = static_cast<std::string>(TIME) + time_filename;
-            write_time(time_path, n_threads, elapsed_avg);
-        }
+            if (rank == 0) {
+                int n_threads = omp_get_max_threads();
+                std::cout << n_threads << std::endl;
+                std::string time_path = static_cast<std::string>(TIME) + time_filename;
+                write_time(time_path, rows, cols, n_threads, elapsed_avg);
+            }
+        #endif
     }
 
     MPI_Finalize();

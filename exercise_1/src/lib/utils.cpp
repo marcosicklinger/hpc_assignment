@@ -43,7 +43,7 @@ void write_state(std::string &filename, void *data, int &height, int &width) {
     state.close();
 }
 
-void read_state_from_pgm (unsigned char *dest, const std::string &filename) {
+void read_pgm_file (const std::string &filename, unsigned char *dest) {
     std::ifstream life_img(filename, std::ios::binary);
     int height, width, max_gray_value;
     std::string format;
@@ -70,12 +70,21 @@ double mean(const double *values, int size) {
     return sum;
 }
 
-void write_time(std::string &filename, int n, double time){
-    std::ofstream ofile(filename,std::ios_base::out | std::ios::app);
-    if (!ofile) {
-        ofile.open(filename);
-        ofile << "n" << "\t" << "time" << std::endl;
+void write_time(std::string &filename, int rows, int cols, int n, double time){
+    std::ofstream ofile;
+    if (!std::filesystem::exists(filename)) {
+        ofile.open(filename, std::ios_base::out);
+        ofile << "h" << "\t" << "w" << "\t" << "n" << "\t" << "time" << std::endl;
+    } else {
+        ofile.open(filename,std::ios_base::out | std::ios::app);
     }
-    ofile << n << "\t" << time << std::endl;
+    ofile << rows << "\t" << cols << "\t" <<  n << "\t" << time << std::endl;
     ofile.close();
+}
+void read_state(const std::string &filename, int *state, int size){
+    auto *file_pgm = new unsigned char[size];
+    read_pgm_file(filename, file_pgm);
+    for (int n = 0; n < size; n++) {
+        state[n] = static_cast<int>(file_pgm[n]);
+    }
 }

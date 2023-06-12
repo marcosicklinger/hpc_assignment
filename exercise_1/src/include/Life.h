@@ -14,9 +14,9 @@ private:
     int rows, localRows, localRowsHalo;
     int cols, localColsHalo;
     int lifeSize, localSize, localSizeHalo;
-    unsigned char *localState;
-    unsigned char *localObs;
-    unsigned char *localObsNext;
+    int *localState;
+    int *localObs;
+    int *localObsNext;
     double elapsed = 0;
 
     void computeHaloRows();

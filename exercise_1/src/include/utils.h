@@ -7,9 +7,11 @@ void make_directory(const std::string &directory);
 
 void write_state(std::string &filename, void *data, int &height, int &width);
 
-void read_state_from_pgm(unsigned char *dest, const std::string &filename);
+void read_pgm_file(const std::string &filename, unsigned char *dest);
 
-void write_time(std::string &filename, int n, double time);
+void read_state(const std::string &filename, int *state, int size);
+
+void write_time(std::string &filename, int rows, int cols, int n, double time);
 
 double mean(const double *values, int size);
 
