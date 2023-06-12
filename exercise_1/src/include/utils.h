@@ -1,9 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-unsigned char * generate_random_life(int &rows, int &cols);
+int * generate_random_life(int &rows, int &cols);
 
-void write_state(std::string &filename, void *data, int &height, int &width);
+void write_state(std::string &filename, int *data, int &height, int &width);
 
 void read_pgm_file(const std::string &filename, unsigned char *dest);
 

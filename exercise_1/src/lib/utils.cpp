@@ -6,17 +6,17 @@
 #include "../include/utils.h"
 #include "../include/consts.h"
 
-unsigned char * generate_random_life(int &rows, int &cols) {
+int * generate_random_life(int &rows, int &cols) {
     int life_size = rows * cols;
-    auto *world = new unsigned char[life_size];
+    auto *world = new int[life_size];
     srand((unsigned) time(nullptr));
     for (int i = 0; i < life_size; i++) {
-        world[i] = rand()%2 ? (unsigned char) ALIVE : (unsigned char) DEAD;
+        world[i] = rand()%2 ? ALIVE : DEAD;
     }
     return world;
 }
 
-void write_state(std::string &filename, void *data, int &height, int &width) {
+void write_state(std::string &filename, int *data, int &height, int &width) {
     std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
@@ -25,9 +25,13 @@ void write_state(std::string &filename, void *data, int &height, int &width) {
     } catch (const std::exception& exception) {
         std::cerr << exception.what() << std::endl;
     }
-    int max_gray_value{static_cast<int>(DEAD)};
+    int max_gray_value{DEAD};
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
-    unsigned int state_size = height*width;
+    int state_size = height*width;
+    auto *writable_data = new unsigned char [state_size];
+    for (int n = 0; n < state_size; n++) {
+        writable_data[n] = static_cast<unsigned char>(data[n]);
+    }
     state.write(reinterpret_cast<const char*>(data), state_size);
     state.close();
 }
@@ -41,7 +45,6 @@ void read_pgm_file (const std::string &filename, unsigned char *dest) {
     life_img.read(reinterpret_cast<char*>(dest), height*width);
     life_img.close();
 }
-
 
 void write_time(std::string &filename, int rows, int cols, int n, double time){
     std::ofstream ofile;

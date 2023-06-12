@@ -45,7 +45,7 @@ lifeSize(_rows*_cols) {
         for (int r = 1; r < n_procs; r++) {
             int add_offset = r == n_procs - 1 ? 1 : 0;
             MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
-                     MPI_UNSIGNED_CHAR, r, 0,
+                     MPI_INT, r, 0,
                      MPI_COMM_WORLD);
         }
 
@@ -53,7 +53,7 @@ lifeSize(_rows*_cols) {
     }
     if (rank != 0) {
         MPI_Recv(localState, localSize,
-                 MPI_UNSIGNED_CHAR,
+                 MPI_INT,
                  0, 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
@@ -119,12 +119,12 @@ void Life::freezeGlobalState(int &age) {
         std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(unsigned char));
     }
 
-    unsigned char *globalState = nullptr;
+    int *globalState = nullptr;
     int *recv_counts = nullptr;
     int *displs = nullptr;
 
     if (rank == 0) {
-        globalState = new unsigned char[rows*cols];
+        globalState = new int[rows*cols];
         recv_counts = new int[n_procs];
         displs = new int[n_procs];
 
@@ -137,9 +137,9 @@ void Life::freezeGlobalState(int &age) {
     }
 
     MPI_Gatherv(localState, localSize,
-                MPI_UNSIGNED_CHAR,
+                MPI_INT,
                 globalState, recv_counts, displs,
-                MPI_UNSIGNED_CHAR,
+                MPI_INT,
                 0,
                 MPI_COMM_WORLD);
 
@@ -200,11 +200,11 @@ void Life::initializeObs(){
 
 void Life::haloExchange (){
     ompi_status_public_t status1, status2;
-    MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, upRank, 0,
-                 localObs, localColsHalo, MPI_UNSIGNED_CHAR, loRank, 0,
+    MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
+                 localObs, localColsHalo, MPI_INT, loRank, 0,
                  MPI_COMM_WORLD, &status1);
-    MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, loRank, 1,
-                 localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_UNSIGNED_CHAR, upRank, 1,
+    MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
+                 localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
                  MPI_COMM_WORLD, &status2);
     MPI_Barrier(MPI_COMM_WORLD);
 }
