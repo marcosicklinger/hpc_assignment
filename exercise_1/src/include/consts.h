@@ -5,7 +5,7 @@ constexpr const char SNAPSHOT[] = "./snapshot/";
 constexpr const char TIME[] = "./time/";
 
 constexpr int ALIVE = 0;
-constexpr int DEAD = 1;
+constexpr int DEAD = 255;
 
 constexpr unsigned int SIZE = 100;
 

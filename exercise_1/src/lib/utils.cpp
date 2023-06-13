@@ -17,10 +17,10 @@ int * generate_random_life(int &rows, int &cols) {
 }
 
 void write_state(std::string &filename, int *data, int &height, int &width) {
-    std::ofstream state(filename, std::ios_base::out | std::ios::binary | std::ios_base::trunc);
+    std::ofstream state(filename + ".pgm", std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
-            throw std::runtime_error("Error when trying to open the file: " + std::string(filename));
+            throw std::runtime_error("Error when trying to write the file: " + std::string(filename));
         }
     } catch (const std::exception& exception) {
         std::cerr << exception.what() << std::endl;
@@ -37,7 +37,7 @@ void write_state(std::string &filename, int *data, int &height, int &width) {
 }
 
 void read_pgm_file (const std::string &filename, unsigned char *dest) {
-    std::ifstream life_img(filename, std::ios::binary);
+    std::ifstream life_img(filename + ".pgm", std::ios::binary);
     int height, width, max_gray_value;
     std::string format;
     life_img >> format >> width >> height >> max_gray_value;

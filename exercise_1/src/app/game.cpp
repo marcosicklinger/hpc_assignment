@@ -106,8 +106,8 @@ int main(int argc, char *argv[]) {
     if (run) {
         if (rank == 0) {
             try {
-                if (!std::filesystem::exists(SNAPSHOT + snapshot_filename)) {
-                    throw std::runtime_error("Error when trying to open the file: " + snapshot_filename);
+                if (!std::filesystem::exists(SNAPSHOT + snapshot_filename + ".pgm")) {
+                    throw std::runtime_error("Error when trying to read the file: " + snapshot_filename);
                 }
             } catch (const std::exception& exception) {
                 std::cerr << exception.what() << std::endl;
