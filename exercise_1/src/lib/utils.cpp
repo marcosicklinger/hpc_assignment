@@ -32,7 +32,7 @@ void write_state(std::string &filename, int *data, int &height, int &width) {
     for (int n = 0; n < state_size; n++) {
         writable_data[n] = static_cast<unsigned char>(data[n]);
     }
-    state.write(reinterpret_cast<const char*>(data), state_size);
+    state.write(reinterpret_cast<const char*>(writable_data), state_size);
     state.close();
 }
 

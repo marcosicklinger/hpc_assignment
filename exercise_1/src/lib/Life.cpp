@@ -40,7 +40,7 @@ lifeSize(_rows*_cols) {
         filename = loc + filename;
         read_state(filename, globalState, lifeSize);
 
-        std::memcpy(localState, globalState, (localSize)*sizeof(unsigned char));
+        std::memcpy(localState, globalState, (localSize)*sizeof(int));
 
         for (int r = 1; r < n_procs; r++) {
             int add_offset = r == n_procs - 1 ? 1 : 0;
@@ -82,8 +82,8 @@ void Life::computeHaloCols() {
     }
 }
 
-unsigned char Life::census(int x, int y) const {
-    unsigned char dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
+int Life::census(int x, int y) const {
+    int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
                localObs[x*localColsHalo + (y - 1)]                    + localObs[x*localColsHalo + (y + 1)] +
                localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
     return (8 - dead);
@@ -93,7 +93,7 @@ void Life::staticStep() {
     #pragma omp parallel for schedule(static)
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++){
-            unsigned char local_population = census(x, y);
+            int local_population = census(x, y);
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
@@ -104,7 +104,7 @@ void Life::staticStep() {
 void Life::orderedStep() {
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++) {
-            unsigned char local_population = census(x, y);
+            int local_population = census(x, y);
             bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
                          (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
             localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
@@ -116,7 +116,7 @@ void Life::orderedStep() {
 
 void Life::freezeGlobalState(int &age) {
     for (int x = 1; x <= localRows; x++) {
-        std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(unsigned char));
+        std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(int));
     }
 
     int *globalState = nullptr;
@@ -159,7 +159,7 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
         haloExchange();
         computeHaloCols();
         staticStep();
-        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(unsigned char));
+        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
         #ifdef SSAVE
             if (age%record_every == 0) {
                 freezeGlobalState(age);

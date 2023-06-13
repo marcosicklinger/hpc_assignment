@@ -29,7 +29,7 @@ private:
 
     ~Life();
 
-    [[nodiscard]] unsigned char census(int x, int y) const;
+    [[nodiscard]] int census(int x, int y) const;
 
     void staticStep();
 
