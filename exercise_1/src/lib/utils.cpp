@@ -46,15 +46,15 @@ void read_pgm_file (const std::string &filename, unsigned char *dest) {
     life_img.close();
 }
 
-void write_time(std::string &filename, int rows, int cols, int n, double time){
+void write_time(std::string &filename, int rows, int cols, int n_threads, int n_procs, double time){
     std::ofstream ofile;
     if (!std::filesystem::exists(filename)) {
         ofile.open(filename, std::ios_base::out);
-        ofile << "h" << "\t" << "w" << "\t" << "n" << "\t" << "time" << std::endl;
+        ofile << "h" << "\t" << "w" << "\t" << "np" << "\t" << "nt" << "\t" << "time" << std::endl;
     } else {
         ofile.open(filename,std::ios_base::out | std::ios::app);
     }
-    ofile << rows << "\t" << cols << "\t" <<  n << "\t" << time << std::endl;
+    ofile << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << time << std::endl;
     ofile.close();
 }
 void read_state(const std::string &filename, int *state, int size){

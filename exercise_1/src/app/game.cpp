@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
                 int n_threads = omp_get_max_threads();
                 std::cout << n_threads << std::endl;
                 std::string time_path = static_cast<std::string>(TIME) + time_filename;
-                write_time(time_path, rows, cols, n_threads, elapsed_avg);
+                write_time(time_path, rows, cols, n_threads, n_procs, elapsed_avg);
             }
         #endif
     }
