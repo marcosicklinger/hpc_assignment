@@ -6,7 +6,6 @@ constexpr const char TIME[] = "./time/";
 
 constexpr int ALIVE = 0;
 constexpr int DEAD = 1;
-constexpr int NORM_DEAD = 1;
 
 constexpr unsigned int SIZE = 100;
 

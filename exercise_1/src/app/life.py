@@ -12,7 +12,7 @@ def load_pgm_snapshot(file):
 def binary_cmap():
     colors = ['black', 'white']
     cmap = mcolors.ListedColormap(colors)
-    norm = mcolors.Normalize(vmin=0, vmax=1)
+    norm = mcolors.Normalize(vmin=0, vmax=255)
     return cmap, norm
 
 
@@ -24,6 +24,6 @@ def plot_image(image):
 
 
 if __name__ == '__main__':
-    file = '../../../snapshot/20.pgm'
+    file = 'snapshot/snapshot_00020.pgm'
     image = load_pgm_snapshot(file)
     plot_image(image)

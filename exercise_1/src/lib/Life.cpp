@@ -144,7 +144,9 @@ void Life::freezeGlobalState(int &age) {
                 MPI_COMM_WORLD);
 
     if (rank == 0) {
-        std::string filename = loc + std::to_string(age);
+        std::string age_string = std::to_string(age);
+        pad_age_string(age_string);
+        std::string filename = loc + "snapshot_" + age_string;
         write_state(filename, globalState, rows, cols);
     }
 

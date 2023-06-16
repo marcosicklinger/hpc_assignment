@@ -1,7 +1,9 @@
 # LOOP VARIABLES
 NTRIALS := 1
 NTASKS := 1
+MIN_NTASKS := $(NTASKS)
 NTHRDS := 1
+MIN_NTHRDS := $(NTHRDS)
 NSOCKS := 1
 
 # LIFE SIZE, RECORDING RATE, LIFETIME
@@ -47,8 +49,8 @@ ordered:
 # STATIC RUN
 static:
 	@for s in $(SIZE); do \
-  		for n in $$(seq $(NTASKS)); do \
-  			for m in $$(seq $(NTHRDS)); do \
+  		for n in $$(seq $(MIN_NTASKS) $(NTASKS)); do \
+  			for m in $$(seq $(MIN_NTHRDS) $(NTHRDS)); do \
 		  		for _ in $$(seq $(NTRIALS)); do \
 		  			mpirun $(MAPFLAGS) -np $$n -x OMP_PROC_BIND=close -x OMP_NUM_THREADS=$$m src/game.x $(STATICFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) -t $(TFNAME); \
 			  	done; \

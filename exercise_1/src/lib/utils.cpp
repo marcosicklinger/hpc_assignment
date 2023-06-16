@@ -24,13 +24,13 @@ void write_state(std::string &filename, int *data, int &height, int &width) {
         }
     } catch (const std::exception& exception) {
         std::cerr << exception.what() << std::endl;
-    }
-    int max_gray_value{DEAD};
+    }unsigned char max_pixel_value = 255;
+    int max_gray_value = static_cast<int>(max_pixel_value);
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
     int state_size = height*width;
     auto *writable_data = new unsigned char [state_size];
     for (int n = 0; n < state_size; n++) {
-        writable_data[n] = static_cast<unsigned char>(data[n]);
+        writable_data[n] = static_cast<unsigned char>(data[n])*max_pixel_value;
     }
     state.write(reinterpret_cast<const char*>(writable_data), state_size);
     state.close();
@@ -57,10 +57,20 @@ void write_time(std::string &filename, int rows, int cols, int n_threads, int n_
     ofile << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << time << std::endl;
     ofile.close();
 }
+
 void read_state(const std::string &filename, int *state, int size){
     auto *file_pgm = new unsigned char[size];
     read_pgm_file(filename, file_pgm);
     for (int n = 0; n < size; n++) {
-        state[n] = static_cast<int>(file_pgm[n]);
+        state[n] = static_cast<int>(file_pgm[n])/255;
     }
 }
+
+void pad_age_string(std::string &age_string) {
+    int num_digs_in_age = static_cast<int>(age_string.length());
+    if (num_digs_in_age < 5) {
+        age_string = std::string(5 - num_digs_in_age, '0') + age_string;
+    }
+}
+
+

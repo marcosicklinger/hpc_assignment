@@ -97,6 +97,8 @@ int main(int argc, char *argv[]) {
 
     if (init && rank == 0) {
         auto *world = generate_random_life(rows, cols);
+        pad_age_string(snapshot_filename);
+        snapshot_filename = "snapshot_" + snapshot_filename;
         std::string instance = static_cast<std::string>(SNAPSHOT) + snapshot_filename;
         write_state(instance, world, rows, cols);
 
