@@ -1,39 +1,61 @@
-NTRIALS ?= 1
+# LOOP VARIABLES
+NTRIALS := 1
+NTASKS := 1
+NTHRDS := 1
+NSOCKS := 1
 
-SIZE ?= 100
-S ?= 1
-T ?= 100
+# LIFE SIZE, RECORDING RATE, LIFETIME
+SIZE := 100
+S := 1
+T := 100
 
-TFNAME ?= time.txt
+# STARTING SNAPSHOT NAME
+FNAME := 0
+TFNAME := time.txt
 
-NPROCS ?= 1
-NTHRDS ?= 1
-NSOCKS ?= 1
-CPS ?= 8
+CPS := 8
 
+# COMPILATION FLAGS
 COMPILEFLAGS := -O2 -Wall -fopenmp
 SAVINGFLAGS := ${DIRS}
 
+# RUNNING FLAGS
+MAPFLAG := --map-by socket
+ORDEREDFLAGS := -e 0 -i -r
+STATICFLAGS := -e 1 -i -r
+
+# SETUP OF DIRECTORY
 setup:
 	mkdir -p snapshot
 	mkdir -p time
 	mkdir -p simulation
 
+# COMPILE APPLICATION
 game: src/game.x
 
 src/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
 	mpiCC $(COMPILEFLAGS) $(SAVINGFLAGS) -o $@ $^
 
-
-.PHONY: ordered
+# ORDERED RUN
 ordered:
 	@for s in $(SIZE); do \
 		for _ in $$(seq $(NTRIALS)); do \
-			mpirun -np 1 -x OMP_NUM_THREADS=1 src/game.x -e 0 -i -r -h $$s -w $$s -f 0 -n $(T) -s $(S) -t ordered.txt; \
+			mpirun -np 1 -x OMP_NUM_THREADS=1 src/game.x $(ORDEREDFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) -t $(TFNAME); \
 		done; \
 	done
 
-.PHONY: staticomp
+# STATIC RUN
+static:
+	@for s in $(SIZE); do \
+  		for n in $$(seq $(NTASKS)); do \
+  			for m in $$(seq $(NTHRDS)); do \
+		  		for _ in $$(seq $(NTRIALS)); do \
+		  			mpirun $(MAPFLAGS) -np $$n -x OMP_PROC_BIND=close -x OMP_NUM_THREADS=$$m src/game.x $(STATICFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) -t $(TFNAME); \
+			  	done; \
+  			done; \
+	  	done; \
+  	done
+
 staticomp:
 	@for s in $(SIZE); do \
 		for n in $$(seq $(CPS)); do \
@@ -43,7 +65,6 @@ staticomp:
 	  	done; \
   	done
 
-.PHONY: staticmpistrong
 staticmpistrong:
 	@for s in $(SIZE); do \
 		for n in $$(seq $$(expr $(CPS) \* $(NS))); do \
@@ -53,16 +74,17 @@ staticmpistrong:
 		done; \
 	done
 
-.PHONY: statichbstrong
 statichbstrong:
 	@for s in $(SIZE); do \
 		for n in $$(seq $(NS)); do \
-			for _ in $$(seq $(M)); do \
+			for _ in $$(seq $(NTRIALS)); do \
 				mpirun --map-by core -np $$n -x OMP_PROC_BIND=close -x OMP_NUM_THREADS=$(CPS) src/game.x -e 1 -i -r -h $$s -w $$s -f 0 -n $(T) -t hbstrong.txt; \
 			done; \
 		done; \
 	done
 
+# CLEANING
+.PHONY: clean
 clean: clean_exe clean_snapshot clean_time
 
 clean_exe:

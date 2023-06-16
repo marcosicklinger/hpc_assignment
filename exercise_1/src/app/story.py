@@ -3,12 +3,13 @@ import os
 from life import *
 from PIL import Image
 from scipy import ndimage
+import tqdm
 
 
 def save_story(file_list, output_file):
     history = []
     frame_size = (500, 500)
-    for file in file_list:
+    for file in tqdm.tqdm(file_list):
         image = load_pgm_snapshot(file)
         resized_image = ndimage.zoom(image, (frame_size[0] / image.shape[0], frame_size[1] / image.shape[1]))
         pil_image = Image.fromarray(resized_image)
