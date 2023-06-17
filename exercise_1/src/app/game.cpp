@@ -29,7 +29,7 @@ void print_help(int arg) {
                 "-f:        source file                 string\n"
                 "-n:        lifetime                    positive int\n"
                 "-s:        snapshot saving rate        positive int\n"
-                "-t:        exe times save path        string\n"
+                "-t:        exe times save path         string\n"
     << std::endl;
     exit(1);
 }
@@ -139,7 +139,6 @@ int main(int argc, char *argv[]) {
 
             if (rank == 0) {
                 int n_threads = omp_get_max_threads();
-                std::cout << n_threads << std::endl;
                 std::string time_path = static_cast<std::string>(TIME) + time_filename;
                 write_time(time_path, rows, cols, n_threads, n_procs, elapsed_avg);
             }
