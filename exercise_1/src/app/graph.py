@@ -6,19 +6,23 @@ import pandas as pd
 NP = 'np'
 NT = 'nt'
 
+
 def import_time_data(path):
     return pd.read_csv(path, sep='\t')
+
 
 def plot_speedup(N, T, ERR, size):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     count = 0
     for n, t, err in zip(N, T, ERR):
         # ax.plot(N, t)
-        ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0, label='{}x{}'.format(size[count][0], size[count][1]))
+        ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0,
+                    label='{}x{}'.format(size[count][0], size[count][1]))
         count += 1
     ax.plot([i for i in range(1, np.max(N) + 1)], [i for i in range(1, np.max(N) + 1)], color='red', label='ideal')
     ax.legend()
     plt.show()
+
 
 def get_time_stats(punits, mod, data):
     t = data['time'].values
@@ -31,6 +35,7 @@ def get_time_stats(punits, mod, data):
         std[n - 1] = np.std(t_n)
 
     return t_mean, std
+
 
 def get_speedup_stats(punits, mod, data):
     t = data['time'].values
@@ -45,11 +50,10 @@ def get_speedup_stats(punits, mod, data):
         t_mean = np.mean(t_n)
         t_std = np.std(t_n)
 
-        s_mean[n - 1] = t1_mean/t_mean
-        s_std[n - 1] = s_mean[n - 1]*(t1_std/t1_mean + t_std/t_mean)
+        s_mean[n - 1] = t1_mean / t_mean
+        s_std[n - 1] = s_mean[n - 1] * (t1_std / t1_mean + t_std / t_mean)
 
     return s_mean, s_std
-
 
 
 def main():
@@ -66,11 +70,9 @@ def main():
         if len(np.unique(data[NP].values)) == 1 and len(np.unique(data[NT].values)) > 1:
             punits = np.unique(data[NT].values)
             mod = NT
-            print('1')
         elif len(np.unique(data[NT].values)) == 1 and len(np.unique(data[NP].values)) > 1:
             punits = np.unique(data[NP].values)
             mod = NP
-            print('2')
         else:
             pass
 
@@ -88,4 +90,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
