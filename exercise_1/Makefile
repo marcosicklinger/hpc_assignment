@@ -11,13 +11,13 @@ T := 100
 
 # STARTING SNAPSHOT NAME
 FNAME := 0
-TFNAME := time.txt
+TFNAME := time/time.txt
 
 CPS := 8
 
 # COMPILATION FLAGS
 COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -fopenmp
-SAVINGFLAGS := ${DIRS}
+SAVINGFLAGS :=
 
 # RUNNING FLAGS
 MAPFLAG := --map-by socket
@@ -30,6 +30,8 @@ setup:
 	mkdir -p time
 	mkdir -p simulation
 
+
+
 # COMPILE APPLICATION
 game: src/game.x
 
@@ -40,7 +42,7 @@ src/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
 ordered:
 	@for s in $(SIZE); do \
 		for _ in $$(seq $(NTRIALS)); do \
-			mpirun -np 1 -x OMP_NUM_THREADS=1 src/game.x $(ORDEREDFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) -t $(TFNAME); \
+			mpirun -np 1 -x OMP_NUM_THREADS=1 src/game.x $(ORDEREDFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) >> $(TFNAME); \
 		done; \
 	done
 
@@ -50,7 +52,7 @@ static:
   		for n in $(NTASKS); do \
   			for m in $(NTHREADS); do \
 		  		for _ in $$(seq $(NTRIALS)); do \
-		  			mpirun $(MAPFLAGS) -np $$n -x OMP_PROC_BIND=close -x OMP_NUM_THREADS=$$m src/game.x $(STATICFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) -t $(TFNAME); \
+		  			mpirun $(MAPFLAGS) -np $$n -x OMP_PROC_BIND=close -x OMP_NUM_THREADS=$$m src/game.x $(STATICFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) >> $(TFNAME); \
 			  	done; \
   			done; \
 	  	done; \
