@@ -75,12 +75,12 @@ int main(int argc, char** argv)
     return 0;
     }
 
-    std::cout << "\nThis example computes real matrix C=alpha*A*B+beta*C using\n"
-                 "BLAS function dgemm, where A, B, and C are matrices and\n"
-                 "alpha and beta are scalars\n\n"
-                 "Initializing data for matrix multiplication C=A*B for matrix\n"
-                 "A(" << m << "x" << k << ") and matrix B(" << k << "x" << n << ")\n\n"
-    << std::endl;
+//    std::cout << "\nThis example computes real matrix C=alpha*A*B+beta*C using\n"
+//                 "BLAS function dgemm, where A, B, and C are matrices and\n"
+//                 "alpha and beta are scalars\n\n"
+//                 "Initializing data for matrix multiplication C=A*B for matrix\n"
+//                 "A(" << m << "x" << k << ") and matrix B(" << k << "x" << n << ")\n\n"
+//    << std::endl;
 
     DATATYPE
     alpha = 1.0; beta = 0.0;
@@ -110,15 +110,16 @@ int main(int argc, char** argv)
     }
 
     sleep(1);
-    std::cout << " Computing matrix product using gemm function via CBLAS interface \n" << std::endl;
+//    std::cout << " Computing matrix product using gemm function via CBLAS interface \n" << std::endl;
     clock_gettime(CLOCK_MONOTONIC, &begin);
     GEMMCPU(CblasColMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, m, B, k, beta, C, m);
     clock_gettime(CLOCK_MONOTONIC, &end);
     elapsed = (double)diff(begin,end).tv_sec + (double)diff(begin,end).tv_nsec / 1000000000.0;
     double gflops = 2.0 * m *n*k;
     gflops = gflops/elapsed*1.0e-9;
-    std::cout << "\nElapsed time " << diff(begin, end).tv_sec << "." << diff(begin, end).tv_nsec << " s\n\n\n";
-    std::cout << m << "x" << n << "x" << k << "\t" << elapsed << " s\t" << gflops << " GFLOPS" << std::endl;
+//    std::cout << "\nElapsed time " << diff(begin, end).tv_sec << "." << diff(begin, end).tv_nsec << " s\n\n\n";
+    // output: m - n - k - elapsed (sec) - gflops
+    std::cout << m << "\t" << n << "\t" << k << "\t" << elapsed << "\t" << gflops << std::endl;
 
 
     #ifdef PRINT
