@@ -14,6 +14,9 @@ while getopts ":k:" opt; do
   esac
 done
 
+make clean
+make game SAVINGFLAGS="-DTSAVE"
+
 export OMP_NUM_THREADS=1
 for s in $size
 do

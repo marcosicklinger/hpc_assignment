@@ -20,6 +20,9 @@ while getopts ":m:k:p:t:" opt; do
   esac
 done
 
+make clean
+make game SAVINGFLAGS="-DTSAVE"
+
 for s in $size
 do
   for p in $ntasks
