@@ -11,7 +11,7 @@ def import_time_data(path):
     return pd.read_csv(path, sep='\t')
 
 
-def plot_speedup(N, T, ERR, size):
+def plot_speedup(N, T, ERR, size, mod):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     count = 0
     for n, t, err in zip(N, T, ERR):
@@ -20,6 +20,9 @@ def plot_speedup(N, T, ERR, size):
                     label='{}x{}'.format(size[count][0], size[count][1]))
         count += 1
     ax.plot([i for i in range(1, np.max(N) + 1)], [i for i in range(1, np.max(N) + 1)], color='red', label='ideal')
+    xlabel = "mpi tasks" if mod == 2 else "omp threads"
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('speedup')
     ax.legend()
     plt.show()
 
@@ -85,7 +88,7 @@ def main():
         ERR_S += [s_std]
         size += [group_key]
 
-    plot_speedup(N, S, ERR_S, size)
+    plot_speedup(N, S, ERR_S, size, mod)
 
 
 if __name__ == '__main__':

@@ -1,10 +1,18 @@
 #!/bin/bash
 
-ntrials=3
+ntrials=10
 size="100 200"
 time=100
 step=1
 fname=0
+
+while getopts ":k:" opt; do
+  case $opt in
+    k) size=$OPTARG;;
+    *) echo "invalid option";
+        exit 1;;
+  esac
+done
 
 export OMP_NUM_THREADS=1
 for s in $size

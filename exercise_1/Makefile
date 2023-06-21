@@ -1,28 +1,11 @@
-# LOOP VARIABLES
-NTRIALS := 1
-NTASKS := 1
-NTHREADS := 1
-NSOCKS := 1
-
-# LIFE SIZE, RECORDING RATE, LIFETIME
-SIZE := 100
-S := 1
-T := 100
-
-# STARTING SNAPSHOT NAME
-FNAME := 0
-TFNAME := time/time.txt
-
-CPS := 8
+MAP := "socket"
+SIZE := "100"
+NTASKS := "1"
+NTHREADS := "1 2 4 8 16"
 
 # COMPILATION FLAGS
 COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -fopenmp
 SAVINGFLAGS :=
-
-# RUNNING FLAGS
-MAPFLAG := --map-by socket
-ORDEREDFLAGS := -e 0 -i -r
-STATICFLAGS := -e 1 -i -r
 
 # SETUP OF DIRECTORY
 setup:
@@ -47,7 +30,7 @@ ordered:
 #			mpirun -np 1 -x OMP_NUM_THREADS=1 src/game.x $(ORDEREDFLAGS) -h $$s -w $$s -f $(FNAME) -n $(T) -s $(S) >> $(TFNAME); \
 #		done; \
 #	done
-	./ordered.sh
+	./ordered.sh -k "$(SIZE)"
 
 # STATIC RUN
 static:
@@ -60,7 +43,7 @@ static:
 #  			done; \
 #	  	done; \
 #  	done
-	./static.sh
+	./static.sh -m "$(MAP)" -k "$(SIZE)" -p "$(NTASKS)" -t "$(NTHREADS)"
 
 # CLEANING
 .PHONY: clean
