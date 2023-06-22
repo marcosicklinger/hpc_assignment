@@ -16,23 +16,21 @@
 
 export OMP_NUM_THREADS=64
 export OMP_PROC_BIND=close
-export OMP_PLACES=cores
+export OMP_PLACES=sockets
 
 minsize=2000
 maxsize=20000
 step=2000
 ntrials=10
 
-p="-DUSE_FLOAT"
+srun -n 1 make clean
+srun -n 1 make all PREC="-DUSE_FLOAT"
 
-make clean
-make all PREC=$p
-
-#for((k=minsize; k<=maxsize; k+=step))
-#do
-#  for((i=0; i<ntrials; i++))
-#  do
-#    srun -n1 ./mkl.x "$k" "$k" $k >> t
-#    srun -n ./olas.x "$k" "$k" "$k" >> t
-#  done
-#done
+for((k=minsize; k<=maxsize; k+=step))
+do
+  for((i=0; i<ntrials; i++))
+  do
+    srun -n 1 ./mkl.x "$k" "$k" "$k" >> weak/float/mkl_sockets.txt
+    srun -n 1 ./oblas.x "$k" "$k" "$k" >> weak/float/oblas_sockets.txt
+  done
+done
