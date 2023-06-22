@@ -10,14 +10,14 @@ PREC := -DUSE_FLOAT
 all: mkl.x oblas.x
 
 mkl.x: gemm.cpp
-	g++ $(PREC) -DMKL $^ -m64 -I${MKLROOT}/include $(MKL) -o $@
+	@g++ $(PREC) -DMKL $^ -m64 -I${MKLROOT}/include $(MKL) -o $@
 #mkl.x: gemm.c
 #	gcc -DUSE_FLOAT -DMKL $^ -m64 -I${MKLROOT}/include $(MKL) -o $@
 
 oblas.x: gemm.cpp
-	g++ $(PREC) -DOPENBLAS $^ -m64 -I${OPENBLASROOT}/include -L/${OPENBLASROOT}/lib -lopenblas -lpthread -o $@ -fopenmp
+	@g++ $(PREC) -DOPENBLAS $^ -m64 -I${OPENBLASROOT}/include -L/${OPENBLASROOT}/lib -lopenblas -lpthread -o $@ -fopenmp
 #oblas.x: gemm.c
 #	gcc -DUSE_FLOAT -DOPENBLAS $^ -m64 -I${OPENBLASROOT}/include -L/${OPENBLASROOT}/lib -lopenblas -lpthread -o $@ -fopenmp
 
 clean:
-	rm -rf *.x
+	@rm -rf *.x
