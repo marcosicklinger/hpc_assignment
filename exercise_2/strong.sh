@@ -18,6 +18,9 @@ cores="1 2 4 8 16 24 32 48 64"
 ntrials=10
 size=11000
 
+srun -n 1 make clean
+srun -n 1 make all PREC="-DUSE_FLOAT"
+
 for c in $cores
 do
   export OMP_NUM_THREADS=$c
