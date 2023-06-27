@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <ctime>
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include "../include/utils.h"
@@ -16,7 +15,7 @@ int * generate_random_life(int &rows, int &cols) {
     return world;
 }
 
-void write_state(std::string &filename, int *data, int &height, int &width) {
+void write_state(std::string &filename, const int *data, int &height, int &width) {
     std::ofstream state(filename + ".pgm", std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
@@ -24,15 +23,20 @@ void write_state(std::string &filename, int *data, int &height, int &width) {
         }
     } catch (const std::exception& exception) {
         std::cerr << exception.what() << std::endl;
-    }unsigned char max_pixel_value = 255;
+    }
+
+    unsigned char max_pixel_value = 255;
     int max_gray_value = static_cast<int>(max_pixel_value);
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
+
     int state_size = height*width;
     auto *writable_data = new unsigned char [state_size];
     for (int n = 0; n < state_size; n++) {
         writable_data[n] = static_cast<unsigned char>(data[n])*max_pixel_value;
     }
+
     state.write(reinterpret_cast<const char*>(writable_data), state_size);
+    delete [] writable_data;
     state.close();
 }
 
@@ -46,7 +50,7 @@ void read_pgm_file (const std::string &filename, unsigned char *dest) {
     life_img.close();
 }
 
-void write_time(std::string &filename, int rows, int cols, int n_threads, int n_procs, double time){
+void write_time(int rows, int cols, int n_threads, int n_procs, double time){
     std::cout << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << time << std::endl;
 }
 

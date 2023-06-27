@@ -2,12 +2,12 @@
 
 ntrials=10
 map="socket"
-size="100 200 300"
+size="100"
 ntasks="1"
-nthreads="1 2 4 8 16"
+nthreads="1"
 time=100
 step=1
-fname=0
+#fname=./snapshot/snapshot_00000
 
 while getopts ":m:k:p:t:" opt; do
   case $opt in
@@ -21,7 +21,7 @@ while getopts ":m:k:p:t:" opt; do
 done
 
 make clean
-make game SAVINGFLAGS="-DTSAVE"
+make game SAVINGFLAGS="-DTSAVE -DSSAVE"
 
 for s in $size
 do
@@ -33,7 +33,7 @@ do
       export OMP_PROC_BIND=close
       for ((i=0; i<ntrials; i++))
       do
-        mpirun --map-by "$map" -np "$p" src/game.x -e 1 -i -r -h "$s" -w "$s" -f $fname -n $time -s $step >> time/static.txt
+        mpirun --map-by "$map" -np "$p" src/game.x -e 1 -i -r -h "$s" -w "$s" -n $time -s $step >> time/static.txt
       done
     done
   done

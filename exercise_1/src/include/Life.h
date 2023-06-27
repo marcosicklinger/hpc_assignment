@@ -7,17 +7,17 @@ class Life {
 
 private:
 
-    std::string loc;
     int n_procs;
     int rank;
     int loRank, upRank;
+
     int rows, localRows, localRowsHalo;
     int cols, localColsHalo;
     int lifeSize, localSize, localSizeHalo;
+
     int *localState;
     int *localObs;
     int *localObsNext;
-    double elapsed = 0;
 
     void computeHaloRows();
 
@@ -25,7 +25,7 @@ private:
 
     public:
 
-    Life(std::string location, std::string filename, int &_rows, int &_cols, int np, int rk);
+    Life(const std::string &filename, int &_rows, int &_cols, int np, int rk);
 
     ~Life();
 

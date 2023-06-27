@@ -4,6 +4,9 @@
 constexpr const char SNAPSHOT[] = "./snapshot/";
 constexpr const char TIME[] = "./time/";
 
+constexpr const char FNAME_PREFIX[] = "./snapshot/snapshot_";
+constexpr const char DFT_INIT_FNAME[] = "./snapshot/snapshot_00000";
+
 constexpr int ALIVE = 0;
 constexpr int DEAD = 1;
 

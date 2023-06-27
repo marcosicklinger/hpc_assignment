@@ -8,8 +8,7 @@
 #include "../include/utils.h"
 #include "../include/consts.h"
 
-Life::Life(std::string location, std::string filename, int &_rows, int &_cols, int np, int rk):
-loc(std::move(location)),
+Life::Life(const std::string &filename, int &_rows, int &_cols, int np, int rk):
 n_procs(np),
 rank(rk),
 rows(_rows),
@@ -37,7 +36,6 @@ lifeSize(_rows*_cols) {
     int offset = (rows%n_procs)*cols;
     if (rank == 0) {
         auto *globalState = new int [lifeSize];
-        filename = loc + filename;
         read_state(filename, globalState, lifeSize);
 
         std::memcpy(localState, globalState, (localSize)*sizeof(int));
@@ -146,7 +144,7 @@ void Life::freezeGlobalState(int &age) {
     if (rank == 0) {
         std::string age_string = std::to_string(age);
         pad_age_string(age_string);
-        std::string filename = loc + "snapshot_" + age_string;
+        std::string filename = FNAME_PREFIX + age_string;
         write_state(filename, globalState, rows, cols);
     }
 

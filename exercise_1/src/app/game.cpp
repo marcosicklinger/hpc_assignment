@@ -15,8 +15,7 @@ int cols = SIZE;
 bool evolution = ORDERED;
 int lifetime = LIFETIME;
 int record_every = RECORD_EVERY;
-std::string snapshot_filename = "0";
-std::string time_filename = "chrono.txt";
+std::string snapshot_filename = DFT_INIT_FNAME;
 
 void print_help(int arg) {
     std::cout << arg << " not found.\n"
@@ -75,9 +74,6 @@ void get_args(int argc, char *argv[]) {
             case 's':
                 record_every = std::stoi(optarg);
                 break;
-            case 't':
-                time_filename = optarg;
-                break;
             default:
                 print_help(arg);
                 break;
@@ -97,18 +93,14 @@ int main(int argc, char *argv[]) {
 
     if (init && rank == 0) {
         auto *world = generate_random_life(rows, cols);
-        pad_age_string(snapshot_filename);
-        snapshot_filename = "snapshot_" + snapshot_filename;
-        std::string instance = static_cast<std::string>(SNAPSHOT) + snapshot_filename;
-        write_state(instance, world, rows, cols);
-
+        write_state(snapshot_filename, world, rows, cols);
         delete [] world;
     }
 
     if (run) {
         if (rank == 0) {
             try {
-                if (!std::filesystem::exists(SNAPSHOT + snapshot_filename + ".pgm")) {
+                if (!std::filesystem::exists(snapshot_filename + ".pgm")) {
                     throw std::runtime_error("Error when trying to read the file: " + snapshot_filename);
                 }
             } catch (const std::exception& exception) {
@@ -116,7 +108,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        Life life = Life(SNAPSHOT, snapshot_filename, rows, cols, n_procs, rank);
+        Life life = Life( snapshot_filename, rows, cols, n_procs, rank);
 
         double this_elapsed;
         if (!evolution) {
@@ -139,8 +131,7 @@ int main(int argc, char *argv[]) {
 
             if (rank == 0) {
                 int n_threads = omp_get_max_threads();
-                std::string time_path = static_cast<std::string>(TIME) + time_filename;
-                write_time(time_path, rows, cols, n_threads, n_procs, elapsed_avg);
+                std::cout << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << elapsed_avg << std::endl;
             }
         #endif
     }
