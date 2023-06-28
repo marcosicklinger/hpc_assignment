@@ -9,15 +9,16 @@ SAVINGFLAGS :=
 
 # SETUP OF DIRECTORY
 setup:
+	@mkdir -p src/exe
 	@mkdir -p snapshot
 	@mkdir -p time
 	@mkdir -p simulation
 
 # COMPILE APPLICATION
-game: src/game.x
+game: src/exe/game.x
 
-src/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
-	@mpiCC $(COMPILEFLAGS) $(SAVINGFLAGS) -o $@ $^
+src/exe/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
+	@mpicc $(COMPILEFLAGS) $(SAVINGFLAGS) -o $@ $^ -lstdc++
 
 execute:
 	@chmod +x ordered.sh
@@ -50,7 +51,7 @@ static:
 clean: clean_exe clean_snapshot clean_time
 
 clean_exe:
-	@rm src/*.x
+	@rm src/exe/*.x
 
 clean_snapshot:
 	@rm snapshot/*

@@ -4,7 +4,7 @@ ntrials=10
 map="socket"
 size="100"
 ntasks="1"
-nthreads="1"
+nthreads="1 2 4 8 16 32"
 time=100
 step=1
 #fname=./snapshot/snapshot_00000
@@ -33,7 +33,7 @@ do
       export OMP_PROC_BIND=close
       for ((i=0; i<ntrials; i++))
       do
-        mpirun --map-by "$map" -np "$p" src/game.x -e 1 -i -r -h "$s" -w "$s" -n $time -s $step >> time/static.txt
+        mpirun --map-by "$map" -np "$p" src/exe/game.x -e 1 -i -r -h "$s" -w "$s" -n $time -s $step >> time/static.txt
       done
     done
   done
