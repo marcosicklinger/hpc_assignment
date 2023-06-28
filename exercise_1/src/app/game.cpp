@@ -85,9 +85,9 @@ int main(int argc, char *argv[]) {
 
     MPI_Init(&argc, &argv);
 
-    int rank, n_procs;
+    int rank, n_tasks;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
+    MPI_Comm_size(MPI_COMM_WORLD, &n_tasks);
 
     get_args(argc, argv);
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        Life life = Life( snapshot_filename, rows, cols, n_procs, rank);
+        Life life = Life( snapshot_filename, rows, cols, n_tasks, rank);
 
         double this_elapsed;
         if (!evolution) {
@@ -123,15 +123,15 @@ int main(int argc, char *argv[]) {
 
         #ifdef TSAVE
             double elapsed_avg;
-            MPI_Reduce(&this_elapsed, &elapsed_avg, n_procs,
+            MPI_Reduce(&this_elapsed, &elapsed_avg, nTasks,
                        MPI_DOUBLE, MPI_SUM,
                        0,
                        MPI_COMM_WORLD);
-            elapsed_avg /= n_procs;
+            elapsed_avg /= nTasks;
 
             if (rank == 0) {
                 int n_threads = omp_get_max_threads();
-                std::cout << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << elapsed_avg << std::endl;
+                std::cout << rows << "\t" << cols << "\t" <<  nTasks << "\t" <<  n_threads << "\t" << elapsed_avg << std::endl;
             }
         #endif
     }

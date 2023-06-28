@@ -1,5 +1,4 @@
 #include <cstring>
-#include <utility>
 #include <stdexcept>
 #include <mpi.h>
 #include <ostream>
@@ -9,19 +8,19 @@
 #include "../include/consts.h"
 
 Life::Life(const std::string &filename, int &_rows, int &_cols, int np, int rk):
-n_procs(np),
+nTasks(np),
 rank(rk),
 rows(_rows),
 cols(_cols),
 lifeSize(_rows*_cols) {
 
-    loRank = (rank - 1 + n_procs) % n_procs;
-    upRank = (rank + 1) % n_procs;
+    loRank = (rank - 1 + nTasks) % nTasks;
+    upRank = (rank + 1) % nTasks;
 
-    localRows = rows/n_procs;
+    localRows = rows/nTasks;
     localSize = localRows * cols;
-    if (rank == n_procs - 1) {
-        localRows += rows%n_procs;
+    if (rank == nTasks - 1) {
+        localRows += rows%nTasks;
         localSize = localRows*cols;
     }
 
@@ -33,15 +32,15 @@ lifeSize(_rows*_cols) {
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
-    int offset = (rows%n_procs)*cols;
+    int offset = (rows%nTasks)*cols;
     if (rank == 0) {
         auto *globalState = new int [lifeSize];
         read_state(filename, globalState, lifeSize);
 
         std::memcpy(localState, globalState, (localSize)*sizeof(int));
 
-        for (int r = 1; r < n_procs; r++) {
-            int add_offset = r == n_procs - 1 ? 1 : 0;
+        for (int r = 1; r < nTasks; r++) {
+            int add_offset = r == nTasks - 1 ? 1 : 0;
             MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
                      MPI_INT, r, 0,
                      MPI_COMM_WORLD);
@@ -123,12 +122,12 @@ void Life::freezeGlobalState(int &age) {
 
     if (rank == 0) {
         globalState = new int[rows*cols];
-        recv_counts = new int[n_procs];
-        displs = new int[n_procs];
+        recv_counts = new int[nTasks];
+        displs = new int[nTasks];
 
-        int offset = (rows%n_procs)*cols;
-        for (int r = 0; r < n_procs; r++) {
-            int add_offset = r == n_procs - 1 ? 1 : 0;
+        int offset = (rows%nTasks)*cols;
+        for (int r = 0; r < nTasks; r++) {
+            int add_offset = r == nTasks - 1 ? 1 : 0;
             recv_counts[r] = localSize + offset*add_offset;
             displs[r] = localSize*r;
         }
@@ -170,7 +169,7 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
 
 void Life::orderedEvolution(int &lifetime, int &record_every){
     try {
-        if (n_procs > 1) {
+        if (nTasks > 1) {
             throw std::invalid_argument("To run the ordered evolution properly, the number of mpi processes must be equal to 1");
         }
     } catch (const std::invalid_argument& e) {

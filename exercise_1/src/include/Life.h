@@ -7,7 +7,7 @@ class Life {
 
 private:
 
-    int n_procs;
+    int nTasks;
     int rank;
     int loRank, upRank;
 
