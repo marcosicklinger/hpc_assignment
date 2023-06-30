@@ -29,8 +29,6 @@ private:
 
     ~Life();
 
-    [[nodiscard]] int census(int x, int y) const;
-
     void staticStep();
 
     void orderedStep();

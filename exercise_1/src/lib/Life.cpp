@@ -79,32 +79,45 @@ void Life::computeHaloCols() {
     }
 }
 
-int Life::census(int x, int y) const {
-    int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
-               localObs[x*localColsHalo + (y - 1)]                    + localObs[x*localColsHalo + (y + 1)] +
-               localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
-    return (8 - dead);
-}
-
 void Life::staticStep() {
-    #pragma omp parallel for schedule(static) collapse(2)
+    #pragma omp parallel for schedule(static)
         for (int x = 1; x <= localRows; x++) {
+            int r_bot = (x - 1)*localColsHalo;
+            int r_top = (x + 1)*localColsHalo;
+            int r = x*localColsHalo;
             for (int y = 1; y <= cols; y++){
-                int local_population = census(x, y);
-                bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                             (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
-                localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+                int y_bot = y - 1;
+                int y_top = y + 1;
+                int local_population = 8 -
+                                       (
+                                           localObs[r_bot + y_bot] + localObs[r_bot + y] + localObs[r_bot + y_top] +
+                                           localObs[r + y_bot]                           + localObs[r + y_top] +
+                                           localObs[r_top + y_bot] + localObs[r_top + y] + localObs[r_top + y_top]
+                                       );
+                bool lives = (localObs[r + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                             (localObs[r + y] == DEAD && local_population == 3);
+                localObsNext[r + y] = lives ? ALIVE : DEAD;
             }
         }
 }
 
 void Life::orderedStep() {
     for (int x = 1; x <= localRows; x++) {
+        int r_bot = (x - 1)*localColsHalo;
+        int r_top = (x + 1)*localColsHalo;
+        int r = x*localColsHalo;
         for (int y = 1; y <= cols; y++) {
-            int local_population = census(x, y);
-            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
-            localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+            int y_bot = y - 1;
+            int y_top = y + 1;
+            int local_population = 8 -
+                                   (
+                                       localObs[r_bot + y_bot] + localObs[r_bot + y] + localObs[r_bot + y_top] +
+                                       localObs[r + y_bot]             + localObs[r + y_top] +
+                                       localObs[r_top + y_bot] + localObs[r_top + y] + localObs[r_top + y_top]
+                                   );
+            bool lives = (localObs[r + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                         (localObs[r + y] == DEAD && local_population == 3);
+            localObsNext[r + y] = lives ? ALIVE : DEAD;
             computeHaloRows();
             computeHaloCols();
         }

@@ -23,7 +23,7 @@ done
 make clean
 make game SAVINGFLAGS="-DTSAVE -DSSAVE"
 
-export OMP_PLACES=threads
+export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 
 for s in $size
