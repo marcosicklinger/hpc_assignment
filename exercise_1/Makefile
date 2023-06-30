@@ -4,7 +4,7 @@ NTASKS := "1"
 NTHREADS := "1 2 4 8 16"
 
 # COMPILATION FLAGS
-COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -fopenmp
+COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -march=native -fopenmp
 SAVINGFLAGS :=
 
 # SETUP OF DIRECTORY

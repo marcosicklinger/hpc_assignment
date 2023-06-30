@@ -87,15 +87,15 @@ int Life::census(int x, int y) const {
 }
 
 void Life::staticStep() {
-    #pragma omp parallel for schedule(static)
-    for (int x = 1; x <= localRows; x++) {
-        for (int y = 1; y <= cols; y++){
-            int local_population = census(x, y);
-            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
-            localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+    #pragma omp parallel for schedule(static) collapse(2)
+        for (int x = 1; x <= localRows; x++) {
+            for (int y = 1; y <= cols; y++){
+                int local_population = census(x, y);
+                bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                             (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
+                localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+            }
         }
-    }
 }
 
 void Life::orderedStep() {
@@ -198,12 +198,12 @@ void Life::initializeObs(){
 }
 
 void Life::haloExchange (){
-    ompi_status_public_t status1, status2;
+    MPI_Status status1, status2;
     MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
                  localObs, localColsHalo, MPI_INT, loRank, 0,
                  MPI_COMM_WORLD, &status1);
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
                  localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
                  MPI_COMM_WORLD, &status2);
-    MPI_Barrier(MPI_COMM_WORLD);
+//    MPI_Barrier(MPI_COMM_WORLD);
 }
