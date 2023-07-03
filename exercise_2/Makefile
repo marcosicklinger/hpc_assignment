@@ -21,3 +21,7 @@ oblas.x: gemm.cpp
 
 clean:
 	@rm -rf *.x
+	@rm -rf strong/double/*.txt
+	@rm -rf strong/single/*.txt
+	@rm -rf weak/double/*.txt
+	@rm -rf	weak/single/*.txt

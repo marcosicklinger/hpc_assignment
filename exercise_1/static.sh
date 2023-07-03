@@ -4,7 +4,7 @@ ntrials=10
 map="socket"
 size="5000"
 ntasks="1"
-nthreads="1 2 4 8 9 10 11 12 16 32"
+nthreads="1 2 4 8"
 time=100
 step=1
 #fname=./snapshot/snapshot_00000
@@ -23,8 +23,8 @@ done
 make clean
 make game SAVINGFLAGS="-DTSAVE -DSSAVE"
 
-export OMP_PLACES=threads
-export OMP_PROC_BIND=spread
+#export OMP_PLACES=threads
+#export OMP_PROC_BIND=spread
 
 for s in $size
 do

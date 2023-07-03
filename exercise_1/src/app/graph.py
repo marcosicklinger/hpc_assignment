@@ -10,7 +10,6 @@ NT = 3
 def import_time_data(path):
     return pd.read_csv(path, sep='\t')
 
-
 def plot_speedup(N, T, ERR, size, mod):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     count = 0
@@ -25,7 +24,6 @@ def plot_speedup(N, T, ERR, size, mod):
     ax.set_ylabel('speedup')
     ax.legend()
     plt.show()
-
 
 def get_time_stats(punits, mod, data):
     t = data.iloc[:, -1].values
