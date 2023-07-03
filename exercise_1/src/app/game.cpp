@@ -98,16 +98,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (run) {
-        if (rank == 0) {
-            try {
-                if (!std::filesystem::exists(snapshot_filename + ".pgm")) {
-                    throw std::runtime_error("Error when trying to read the file: " + snapshot_filename);
-                }
-            } catch (const std::exception& exception) {
-                std::cerr << exception.what() << std::endl;
-            }
-        }
-
         Life life = Life( snapshot_filename, rows, cols, n_tasks, rank);
 
         double this_elapsed;

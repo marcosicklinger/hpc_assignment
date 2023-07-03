@@ -42,6 +42,13 @@ void write_state(std::string &filename, const int *data, int &height, int &width
 
 void read_pgm_file (const std::string &filename, unsigned char *dest) {
     std::ifstream life_img(filename + ".pgm", std::ios::binary);
+    try {
+        if (!life_img) {
+            throw std::runtime_error("Error when trying to read the file: " + std::string(filename));
+        }
+    } catch (const std::exception& exception) {
+        std::cerr << exception.what() << std::endl;
+    }
     int height, width, max_gray_value;
     std::string format;
     life_img >> format >> width >> height >> max_gray_value;
