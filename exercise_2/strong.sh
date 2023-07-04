@@ -17,9 +17,25 @@ module load mkl
 cores="1 2 4 8 16 24 32 48 64"
 ntrials=10
 size=11000
+PREC="-DUSE_FLOAT"
+OBLAS_FNAME=""
+MKL_FNAME=""
+if [[ "$PREC" == "-DUSE_FLOAT" ]]; then
+    OBLAS_FNAME=weak/single/oblas.txt
+    MKL_FNAME=weak/single/mkl.txt
+    echo "precision is set to -DUSE_FLOAT"
+elif [[ "$PREC" == "-DUSE_DOUBLE" ]]; then
+    OBLAS_FNAME=weak/double/oblas.txt
+    MKL_FNAME=weak/single/mkl.txt
+    echo "precision is set to -DUSE_DOUBLE"
+else
+    echo "Invalid precision flag. Stopping."
+    exit 1
+fi
+echo "Starting..."
 
 srun -n 1 make clean
-srun -n 1 make all PREC="-DUSE_FLOAT"
+srun -n 1 make all PREC=$PREC
 
 for c in $cores
 do
