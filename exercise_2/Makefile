@@ -19,9 +19,11 @@ oblas.x: gemm.cpp
 #oblas.x: gemm.c
 #	gcc -DUSE_FLOAT -DOPENBLAS $^ -m64 -I${OPENBLASROOT}/include -L/${OPENBLASROOT}/lib -lopenblas -lpthread -o $@ -fopenmp
 
-clean:
+clean_src:
 	@rm -rf *.x
+clean_strong:
 	@rm -rf strong/double/*.txt
 	@rm -rf strong/single/*.txt
+clean_weak:
 	@rm -rf weak/double/*.txt
 	@rm -rf	weak/single/*.txt

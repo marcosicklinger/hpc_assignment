@@ -14,14 +14,14 @@
 #module load openBLAS/0.3.21-omp
 #module load mkl
 
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=8
 export OMP_PROC_BIND=close
 export OMP_PLACES=sockets
 
 export MKL_VERBOSE=0
 
 minsize=2000
-maxsize=4000
+maxsize=20000
 step=2000
 ntrials=2
 PREC="-DUSE_FLOAT"
@@ -41,7 +41,8 @@ else
 fi
 echo "Starting..."
 
-make clean
+make clean_src
+make clean_weak
 make all PREC="$PREC"
 
 for((k=minsize; k<=maxsize; k+=step))
