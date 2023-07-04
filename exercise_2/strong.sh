@@ -21,12 +21,12 @@ PREC="-DUSE_FLOAT"
 OBLAS_FNAME=""
 MKL_FNAME=""
 if [[ "$PREC" == "-DUSE_FLOAT" ]]; then
-    OBLAS_FNAME=weak/single/oblas.txt
-    MKL_FNAME=weak/single/mkl.txt
+    OBLAS_FNAME=strong/single/oblas.txt
+    MKL_FNAME=strong/single/mkl.txt
     echo "precision is set to -DUSE_FLOAT"
 elif [[ "$PREC" == "-DUSE_DOUBLE" ]]; then
-    OBLAS_FNAME=weak/double/oblas.txt
-    MKL_FNAME=weak/single/mkl.txt
+    OBLAS_FNAME=strong/double/oblas.txt
+    MKL_FNAME=strong/single/mkl.txt
     echo "precision is set to -DUSE_DOUBLE"
 else
     echo "Invalid precision flag. Stopping."
@@ -44,7 +44,7 @@ do
   export OMP_PLACES=sockets
   for ((i=0; i<ntrials; i++))
   do
-    srun -n 1 ./mkl.x  $size $size $size >> strong/mkl.txt
-    srun -n 1 ./oblas.x  $size $size $size >> strong/oblas.txt
+    srun -n 1 ./mkl.x  $size $size $size >> $MKL_FNAME
+    srun -n 1 ./oblas.x  $size $size $size >> $OBLAS_FNAME
   done
 done
