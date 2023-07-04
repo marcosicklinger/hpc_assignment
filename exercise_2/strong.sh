@@ -34,7 +34,8 @@ else
 fi
 echo "Starting..."
 
-srun -n 1 make clean
+srun -n 1 make clean_src
+srun -n 1 make clean_strong
 srun -n 1 make all PREC=$PREC
 
 for c in $cores

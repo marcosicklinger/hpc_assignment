@@ -39,7 +39,8 @@ else
 fi
 echo "Starting..."
 
-srun -n 1 make clean
+run -n 1 make clean_src
+srun -n 1 make clean_weak
 srun -n 1 make all PREC=$PREC
 
 for((k=minsize; k<=maxsize; k+=step))
