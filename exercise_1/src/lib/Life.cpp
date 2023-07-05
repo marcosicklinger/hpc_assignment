@@ -197,7 +197,7 @@ void Life::initializeObs(){
 
 }
 
-void Life::haloExchange (){
+void Life::haloExchange(){
     MPI_Status status1, status2;
     MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
                  localObs, localColsHalo, MPI_INT, loRank, 0,
