@@ -5,11 +5,13 @@ SAVINGFLAGS :=
 # -----------------
 
 # SETUP OF DIRECTORY
+# ------------------
 setup:
 	@mkdir -p src/exe
 	@mkdir -p snapshot
 	@mkdir -p time
 	@mkdir -p simulation
+# ------------------
 
 # COMPILE APPLICATION
 # -------------------
