@@ -15,7 +15,7 @@
 #define min(x,y) (((x) < (y)) ? (x) : (y))
 
 #ifdef MKL
-#include "mkl/mkl_cblas.h"
+#include "mkl_cblas.h"
 #endif
 
 #ifdef OPENBLAS
@@ -28,13 +28,13 @@
 
 #ifdef USE_FLOAT
 #define MYFLOAT float
-#define DATATYPE printf(" Using float \n\n");
+#define DATATYPE //printf(" Using float \n\n");
 #define GEMMCPU cblas_sgemm
 #endif
 
 #ifdef USE_DOUBLE
 #define MYFLOAT double
-#define DATATYPE printf(" Using double \n\n");
+#define DATATYPE //printf(" Using double \n\n");
 #define GEMMCPU cblas_dgemm
 #endif
 
