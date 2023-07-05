@@ -19,7 +19,7 @@ do
     export OMP_NUM_THREADS=$nthreads
     for ((i=0; i<ntrials; i++))
     do
-      mpirun --map-by core -np $t src/exe/game.x -e 1 -i -r -h "$s" -w "$s" -n $time >> time/static_omp.txt
+      mpirun --map-by core -np $t src/exe/game.x -e 1 -i -r -h $s -w $s -n $time >> time/static_omp.txt
     done
   done
 done
