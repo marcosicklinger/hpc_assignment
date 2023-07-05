@@ -4,7 +4,7 @@ ntrials=10
 map="socket"
 size="5000"
 ntasks="1"
-nthreads="1 2 4 8"
+nthreads="1 2 4 8 16 32"
 time=100
 step=1
 #fname=./snapshot/snapshot_00000
@@ -21,10 +21,7 @@ while getopts ":m:k:p:t:" opt; do
 done
 
 make clean
-make game SAVINGFLAGS="-DTSAVE -DSSAVE"
-
-#export OMP_PLACES=threads
-#export OMP_PROC_BIND=spread
+make game SAVINGFLAGS="-DTSAVE"
 
 for s in $size
 do
@@ -32,6 +29,8 @@ do
   do
     for t in $nthreads
     do
+      export OMP_PLACES=cores
+      export OMP_PROC_BIND=close
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))
       do
