@@ -26,7 +26,7 @@ if [[ "$PREC" == "-DUSE_FLOAT" ]]; then
     echo "precision is set to -DUSE_FLOAT"
 elif [[ "$PREC" == "-DUSE_DOUBLE" ]]; then
     OBLAS_FNAME=strong/double/oblas.txt
-    MKL_FNAME=strong/single/mkl.txt
+    MKL_FNAME=strong/double/mkl.txt
     echo "precision is set to -DUSE_DOUBLE"
 else
     echo "Invalid precision flag. Stopping."
