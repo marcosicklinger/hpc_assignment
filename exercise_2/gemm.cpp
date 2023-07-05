@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iomanip>
+#include <omp.h>
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
 
@@ -28,13 +29,13 @@
 
 #ifdef USE_FLOAT
 #define MYFLOAT float
-#define DATATYPE //printf(" Using float \n\n");
+#define DATATYPE // printf(" Using float \n\n");
 #define GEMMCPU cblas_sgemm
 #endif
 
 #ifdef USE_DOUBLE
 #define MYFLOAT double
-#define DATATYPE //printf(" Using double \n\n");
+#define DATATYPE // printf(" Using double \n\n");
 #define GEMMCPU cblas_dgemm
 #endif
 
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
     gflops = gflops/elapsed*1.0e-9;
 //    std::cout << "\nElapsed time " << diff(begin, end).tv_sec << "." << diff(begin, end).tv_nsec << " s\n\n\n";
     // output: m - n - k - elapsed (sec) - gflops
-    std::cout << m << "\t" << n << "\t" << k << "\t" << elapsed << "\t" << gflops << std::endl;
+    std::cout << omp_get_max_threads() << "\t" << m << "\t" << n << "\t" << k << "\t" << elapsed << "\t" << gflops << std::endl;
 
 
     #ifdef PRINT
