@@ -1,6 +1,6 @@
 # Foundations of High Performance Computing: final assignment
 ## Exercise 1: Parallel Game of Life
-The objective of this exercise is to implement a parallel version of Conway's Game of Life using a hybrid OpenMP-MPI approach.
+The objective of this exercise is to implement a parallel version of Conway's Game of Life using a hybrid OpenMP-MPI approach. Further details on Conway's Game of Life can be found [here](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
 
 ### Structure
 
