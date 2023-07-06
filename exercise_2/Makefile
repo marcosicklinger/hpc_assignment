@@ -10,6 +10,13 @@ setup:
 	mkdir -p strong/single strong/double
 # ------------------
 
+# EXECUTION
+# ---------
+executable:
+	@chmod +x strong.sh
+	@chmod +x weak.sh
+# ---------
+
 # COMPILE ALL
 # -----------
 all: mkl.x oblas.x
@@ -35,7 +42,7 @@ oblas.x: gemm.cpp
 # --------
 .PHONY: clean
 
-clean_src:
+clean_exe:
 	@rm -rf *.x
 clean_strong:
 	@rm -rf strong/double/*.txt

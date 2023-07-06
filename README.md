@@ -31,7 +31,7 @@ The `src` subdirectory contains the core of the application:
 
 ### Specifics
 
-#### Setup
+#### Framework
 
 **_Makefile_** \
 The make file contains a few applications useful to set upe the directory:
@@ -60,4 +60,45 @@ The purpose of this task is to compare the performance of OpenBLAS and MKL libra
 
 ### Structure
 
+The second exercise directory possesses the following structure:
+```angular2html
+├── analysis
+│   ├── strong.py
+│   └── weak.py
+├── gemm.c
+├── gemm.cpp
+├── Makefile
+├── strong.sh
+└── weak.sh
+``` 
+Four files, one makefile, 2 bash scripts (see explanation below) and two C/C++ files, are located right in the first level of the directory.\
+The `analysis` directory contains python scripts for graphical analysis of the data.
+
 ### Specifics
+
+#### Framework
+
+**_Makefile_** \
+The make file contains a few applications useful to set upe the directory:
+- `setup`: running `make setup` will create a tree of directories (inside the exercise main directory) needed for storing useful time measurements for both single and double precision. 
+    ```angular2html
+    ├── strong
+    │   ├── double
+    │   └── single
+    └── weak
+        ├── double
+        └── single
+    ```
+  `weak` directory is used size scaling simulations, while `strong` for core scaling simulations.
+- `executable`: running `make executable` will grant executable permission to the scripts `weak.sh` and `strong.sh`.
+- `all`: running `make all` will create the executables in the current directory. It makes use of the applications `oblas.x` and `mkl.x` which directly compiles the code with the needed libraries and flags.
+- Other applications are `clean_exe`, `clean_weak`, `clean_strong`.
+
+**_Scripts_** 
+- `weak.sh`: runs size scaling analysis;
+- `strong.sh`: runs core scaling analysis;
+
+#### Implementation details
+The following module was exploited for the runs:
+- Architecture: `architecture/AMD`;
+- Math libraries: `openBLAS/0.3.2023`, `mkl/2022.2.1`.

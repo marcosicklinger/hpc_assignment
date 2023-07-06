@@ -39,7 +39,7 @@ else
 fi
 echo "Starting..."
 
-run -n 1 make clean_src
+run -n 1 make clean_exe
 srun -n 1 make clean_weak
 srun -n 1 make all PREC=$PREC
 
