@@ -23,14 +23,17 @@ done
 make clean
 make game SAVINGFLAGS="-DTSAVE"
 
+export OMP_PLACES=cores
+export OMP_PROC_BIND=close
+
 for s in $size
 do
   for p in $ntasks
   do
     for t in $nthreads
     do
-      export OMP_PLACES=cores
-      export OMP_PROC_BIND=close
+#      export OMP_PLACES=cores
+#      export OMP_PROC_BIND=close
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))
       do

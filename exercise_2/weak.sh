@@ -14,11 +14,11 @@
 #module load openBLAS/0.3.21-omp
 #module load mkl
 
+export MKL_VERBOSE=0
+
 export OMP_NUM_THREADS=8
 export OMP_PROC_BIND=close
 export OMP_PLACES=sockets
-
-export MKL_VERBOSE=0
 
 minsize=2000
 maxsize=20000
