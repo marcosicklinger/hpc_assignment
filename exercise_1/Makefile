@@ -23,9 +23,10 @@ src/exe/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
 
 # EXECUTION
 # ---------
-execute:
+executable:
 	@chmod +x ordered.sh
-	@chmod +x static.sh
+	@chmod +x mpiscal.sh
+	@chmod +x ompscal.sh
 # ---------
 
 # CLEANING
