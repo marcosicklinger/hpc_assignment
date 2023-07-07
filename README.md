@@ -2,6 +2,10 @@
 ## Exercise 1: Parallel Game of Life
 The objective of this exercise is to implement a parallel version of Conway's Game of Life using a hybrid OpenMP-MPI approach. Further details on Conway's Game of Life can be found [here](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
 
+<p align="center">
+  <img src="./exercise_1/display/life.gif" alt="Alt Text" width="862" height="256">
+</p>
+
 ### Structure
 The structure of the first exercise's directory is the following:
 ```angular2html
@@ -53,6 +57,7 @@ The make file contains a few applications useful to set upe the directory:
 
 #### Implementation details
 The following module was exploited for the runs:
+- Architecture: `architecture/AMD`;
 - Message Passing Interface: `openMPI/4.1.5/gnu/12.2.1`;
 
 ## Exercise 2: OpenBLAS and MKL for matrix-matrix multiplication
