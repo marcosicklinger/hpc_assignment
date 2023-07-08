@@ -19,7 +19,7 @@ def plot_speedup(N, T, ERR, size, mod):
         ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0,
                     label='{}x{}'.format(size[count][0], size[count][1]))
         count += 1
-    ax.plot([i for i in range(1, np.max(N) + 1)], [i for i in range(1, np.max(N) + 1)], color='red', label='ideal')
+    ax.plot([i for i in range(1, np.max(N[0]) + 1)], [i for i in range(1, np.max(N[0]) + 1)], color='red', label='ideal')
     xlabel = "mpi tasks" if mod == 2 else "omp threads"
     ax.set_xlabel(xlabel)
     ax.set_ylabel('speedup')
@@ -67,6 +67,7 @@ def main():
     all_data = import_time_data(args.path)
     size_groups = all_data.groupby([all_data.columns[i] for i in range(2)])
     N, T, S, ERR_T, ERR_S, size = [], [], [], [], [], []
+    mod=None
     for group_key in list(size_groups.groups.keys()):
         data = size_groups.get_group(group_key)
         punits, mod = None, None

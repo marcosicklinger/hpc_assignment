@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
-#include <filesystem>
 #include "../include/utils.h"
 #include "../include/consts.h"
 #include "../include/Life.h"

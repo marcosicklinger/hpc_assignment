@@ -7,16 +7,16 @@ import pandas as pd
 def import_data(path):
     return pd.read_csv(path, sep='\t', header=None)
 
-def plot_gflops(ax, N, X, ERR, cores, lib, policy):
+def plot_gflops(ax, N, X, ERR, cores, lib, places_policy):
     count = 0
     for n, t, err in zip(N, X, ERR):
         # ax.plot(N, t)
         ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0,
-                    label='{} ({})'.format(lib, policy))
+                    label='{} ({})'.format(lib, places_policy))
         count += 1
-    xlabel = "cores"
+    xlabel = "size"
     ax.set_xlabel(xlabel)
-    ax.set_ylabel('speedup')
+    ax.set_ylabel('gflops')
     ax.legend()
 
 def get_gflops_stats(size, data):
@@ -40,6 +40,8 @@ def main():
     parser.add_argument('--oblas_path', type=str, help='path to txt file')
     args = parser.parse_args()
 
+    places_policy = 'sockets\spread'
+
     mkl_all_data = import_data(args.mkl_path)
     mkl_groups = mkl_all_data.groupby([mkl_all_data.columns[0]])
     oblas_all_data = import_data(args.oblas_path)
@@ -50,7 +52,9 @@ def main():
                         {'mkl': [], 'oblas': []}
     for oblas_key, mkl_key in zip(list(oblas_groups.groups.keys()), list(mkl_groups.groups.keys())):
         mkl_data = mkl_groups.get_group(mkl_key)
+        print('mkl grp\n', mkl_data)
         oblas_data = oblas_groups.get_group(oblas_key)
+        print('oblas grp\n', oblas_data)
 
         assert all(np.unique(mkl_data.iloc[:, 1].values) == np.unique(oblas_data.iloc[:, 1].values))
         assert all(np.unique(mkl_data.iloc[:, 2].values) == np.unique(oblas_data.iloc[:, 2].values))
@@ -70,8 +74,8 @@ def main():
         cores['oblas'] += [oblas_key]
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-    plot_gflops(ax, N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', 'sockets')
-    plot_gflops(ax, N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', 'sockets')
+    plot_gflops(ax, N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', places_policy)
+    plot_gflops(ax, N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', places_policy)
     plt.show()
 
 

@@ -1,16 +1,21 @@
 #!/bin/bash
 
-nodes=3
-tpn=128
-salloc -p EPYC --nodes $nodes --tasks-per-node $tpn --time=10:00:00
+#SBATCH --job-name="e1mpi"
+#SBATCH --output="log.out"
+#SBATCH --partition=EPYC
+#SBATCH	--nodes=3
+#SBATCH --tasks-per-node=128
+#SBATCH --ntasks=384
+#SBATCH --exclusive
+#SBATCH --time=03:00:00
 
-make clean
-make game SAVINGFLAGS="-DTSAVE"
+srun -n 1 make clean
+srun -n 1 make game SAVINGFLAGS="-DTSAVE"
 
 ntrials=1
 nthreads=1
 time=100
-for s in 10000 15000 20000
+for s in 7500 15000
 do
   for t in 1 2 4 8 16 32 48 64 96 128 160 224 288 352 384
   do
