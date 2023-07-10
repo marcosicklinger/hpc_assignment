@@ -12,17 +12,20 @@ def import_time_data(path):
 
 
 def plot_speedup(N, T, ERR, size, mod):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4.5))
     count = 0
     for n, t, err in zip(N, T, ERR):
         # ax.plot(N, t)
-        ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0,
+        ax.errorbar(n, t, err, marker='s', markersize=7.5, linewidth=1.5, elinewidth=2, capsize=0,
                     label='{}x{}'.format(size[count][0], size[count][1]))
         count += 1
-    ax.plot([i for i in range(1, np.max(N[0]) + 1)], [i for i in range(1, np.max(N[0]) + 1)], color='red', label='ideal')
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(0)
+    ax.plot([i for i in range(1, np.max(N[0]) + 1)], [i for i in range(1, np.max(N[0]) + 1)],
+            color='red', label='linear', linestyle='dashed')
     xlabel = "mpi tasks" if mod == 2 else "omp threads"
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel('speedup')
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel('speedup', fontsize=14)
     ax.legend()
     plt.show()
 
