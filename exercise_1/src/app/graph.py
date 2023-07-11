@@ -25,6 +25,22 @@ def plot_speedup(N, T, ERR, size, mod):
     ax.legend()
     plt.show()
 
+def plot_time(N, T, ERR, size, mod):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    count = 0
+    for n, t, err in zip(N, T, ERR):
+        # ax.plot(N, t)
+        ax.errorbar(n, t, err, marker='s', linewidth=0.5, elinewidth=2, capsize=0,
+                    label='{}x{}'.format(size[count][0], size[count][1]))
+        count += 1
+    ax.plot([i for i in range(1, np.max(N) + 1)], [i for i in range(1, np.max(N) + 1)], color='red', label='ideal')
+    xlabel = "mpi tasks"
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('time')
+    ax.legend()
+    plt.show()
+
+
 def get_time_stats(punits, mod, data):
     t = data.iloc[:, -1].values
 
@@ -75,7 +91,7 @@ def main():
             punits = np.unique(data.iloc[:, NP].values)
             mod = NP
         else:
-            pass
+            break
 
         t_mean, t_std = get_time_stats(punits, mod, data)
         s_mean, s_std = get_speedup_stats(punits, mod, data)
@@ -87,6 +103,24 @@ def main():
         size += [group_key]
 
     plot_speedup(N, S, ERR_S, size, mod)
+
+    th_groups = all_data.groupby([all_data.columns[3]])
+    for group_key in list(th_groups.groups.keys()):
+        data = size_groups.get_group(group_key)
+        punits, mod = None, None
+        if len(np.unique(data.iloc[:, NT].values)) == 1 and len(np.unique(data.iloc[:, NP].values)) > 1:
+            punits = np.unique(data.iloc[:, NP].values)
+            mod = NP
+        else:
+            break
+
+        t_mean, t_std = get_time_stats(punits, mod, data)
+        N += [punits]
+        T += [t_mean]
+        ERR_T += [t_std]
+        size += [group_key]
+
+    plot_time(N, S, ERR_S, size, mod)
 
 
 if __name__ == '__main__':

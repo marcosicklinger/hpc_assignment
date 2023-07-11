@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ntrials=10
+ntrials=5
 map="socket"
 size="5000"
 ntasks="1"
@@ -33,7 +33,7 @@ do
     for t in $nthreads
     do
 #      export OMP_PLACES=cores
-#      export OMP_PROC_BIND=close
+      export OMP_PROC_BIND=close
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))
       do

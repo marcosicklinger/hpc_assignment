@@ -87,15 +87,16 @@ int Life::census(int x, int y) const {
 }
 
 void Life::staticStep() {
-    #pragma omp parallel for schedule(static) collapse(2)
-        for (int x = 1; x <= localRows; x++) {
-            for (int y = 1; y <= cols; y++){
-                int local_population = census(x, y);
-                bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                             (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
-                localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
-            }
+    #pragma omp parallel for schedule(static) //collapse(2)
+    for (int x = 1; x <= localRows; x++) {
+        for (int y = 1; y <= cols; y++){
+            int local_population = 8 - (localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
+                                        localObs[x*localColsHalo + (y - 1)]                                             + localObs[x*localColsHalo + (y + 1)] +
+                                        localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)]);
+            int lives = (localObs[x*localColsHalo + y] == ALIVE && local_population == 2) || (local_population == 3);
+            localObsNext[x*localColsHalo + y] = !lives;
         }
+    }
 }
 
 void Life::orderedStep() {
