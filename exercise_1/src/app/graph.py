@@ -35,7 +35,7 @@ def plot_time(N, T, ERR, size, mod):
     for n, t, err in zip(N, T, ERR):
         # ax.plot(N, t)
         ax.errorbar(n, t, err, marker='s', markersize=7.5, linewidth=1.5, elinewidth=2, capsize=0,
-                    label='{}x{}'.format(size[count][0], size[count][1]))
+                    label='{} threads'.format(size[count]))
         count += 1
     for tick in ax.get_xticklabels():
         tick.set_rotation(0)
@@ -113,21 +113,23 @@ def main():
 
     th_groups = all_data.groupby([all_data.columns[3]])
     for group_key in list(th_groups.groups.keys()):
-        data = size_groups.get_group(group_key)
+        data = th_groups.get_group(group_key)
         punits, mod = None, None
         if len(np.unique(data.iloc[:, NT].values)) == 1 and len(np.unique(data.iloc[:, NP].values)) > 1:
             punits = np.unique(data.iloc[:, NP].values)
+            print(punits)
             mod = NP
         else:
             break
 
-        t_mean, t_std = get_time_stats(punits, mod, data)
+        t_mean, t_std = get_speedup_stats(punits, mod, data)
         N += [punits]
         T += [t_mean]
         ERR_T += [t_std]
         size += [group_key]
 
-    plot_time(N, S, ERR_S, size, mod)
+    if other_grp:
+        plot_time(N, T, ERR_T, size, mod)
 
 
 if __name__ == '__main__':

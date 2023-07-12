@@ -81,7 +81,7 @@ void Life::computeHaloCols() {
 
 int Life::census(int x, int y) const {
     int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
-               localObs[x*localColsHalo + (y - 1)]                    + localObs[x*localColsHalo + (y + 1)] +
+               localObs[x*localColsHalo + (y - 1)]                                                   + localObs[x*localColsHalo + (y + 1)] +
                localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
     return (8 - dead);
 }

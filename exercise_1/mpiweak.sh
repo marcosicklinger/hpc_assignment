@@ -24,7 +24,6 @@ export OMP_PROC_BIND=close
 export OMP_NUM_THREADS=$nthreads
 for t in 1 2 3 4 5 6 7 8
 do
-    size=$((t*size0))
 #    export OMP_PLACES=sockets
     for ((i=0; i<ntrials; i++))
     do
