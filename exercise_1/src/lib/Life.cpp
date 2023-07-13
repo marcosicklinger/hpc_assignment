@@ -14,31 +14,39 @@ rows(_rows),
 cols(_cols),
 lifeSize(_rows*_cols) {
 
+    // computation of upper and lower processes' ranks
     loRank = (rank - 1 + nTasks) % nTasks;
     upRank = (rank + 1) % nTasks;
 
+    // computation of the rows for each process' sub-grid
     localRows = rows/nTasks;
     localSize = localRows * cols;
+    // last process takes the remaining rows
     if (rank == nTasks - 1) {
         localRows += rows%nTasks;
         localSize = localRows*cols;
     }
 
+    // computation of rows and columns for padded sub-grids
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
     localSizeHalo = localRowsHalo * localColsHalo;
 
+    // allocation for the local grid, local padded grid
+    // local padded grid at successive time step
     localState = new int [localSize]();
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
-    int offset = (rows%nTasks)*cols;
     if (rank == 0) {
         auto *globalState = new int [lifeSize];
         read_state(filename, globalState, lifeSize);
 
+        // master process takes the first chuck of rows
         std::memcpy(localState, globalState, (localSize)*sizeof(int));
 
+        // sending of local data
+        int offset = (rows%nTasks)*cols;
         for (int r = 1; r < nTasks; r++) {
             int add_offset = r == nTasks - 1 ? 1 : 0;
             MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
@@ -48,6 +56,7 @@ lifeSize(_rows*_cols) {
 
         delete [] globalState;
     }
+    // non-zero-rank processes receives local grids
     if (rank != 0) {
         MPI_Recv(localState, localSize,
                  MPI_INT,
@@ -56,6 +65,7 @@ lifeSize(_rows*_cols) {
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // all the processes initialize their own padded sub-grids
     initializeObs();
 }
 
