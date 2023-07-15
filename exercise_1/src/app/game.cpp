@@ -111,16 +111,16 @@ int main(int argc, char *argv[]) {
         }
 
         #ifdef TSAVE
-            double elapsed_avg;
-            MPI_Reduce(&this_elapsed, &elapsed_avg, n_tasks,
-                       MPI_DOUBLE, MPI_SUM,
-                       0,
-                       MPI_COMM_WORLD);
-            elapsed_avg /= n_tasks;
+//            double elapsed_avg;
+//            MPI_Reduce(&this_elapsed, &elapsed_avg, n_tasks,
+//                       MPI_DOUBLE, MPI_SUM,
+//                       0,
+//                       MPI_COMM_WORLD);
+//            elapsed_avg /= n_tasks;
 
             if (rank == 0) {
                 int n_threads = omp_get_max_threads();
-                std::cout << rows << "\t" << cols << "\t" <<  n_tasks << "\t" <<  n_threads << "\t" << elapsed_avg << std::endl;
+                std::cout << rows << "\t" << cols << "\t" <<  n_tasks << "\t" <<  n_threads << "\t" << this_elapsed << std::endl;
             }
         #endif
     }

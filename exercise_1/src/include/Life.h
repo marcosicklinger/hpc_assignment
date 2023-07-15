@@ -23,7 +23,7 @@ private:
 
     void computeHaloCols();
 
-    public:
+public:
 
     Life(const std::string &filename, int &_rows, int &_cols, int np, int rk);
 
