@@ -117,7 +117,6 @@ def main():
         punits, mod = None, None
         if len(np.unique(data.iloc[:, NT].values)) == 1 and len(np.unique(data.iloc[:, NP].values)) > 1:
             punits = np.unique(data.iloc[:, NP].values)
-            print(punits)
             mod = NP
         else:
             break
