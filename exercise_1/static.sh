@@ -2,7 +2,7 @@
 
 ntrials=5
 map="socket"
-size="5000"
+size="7500"
 ntasks="1"
 nthreads="1 2 4 8 16 32"
 time=100
@@ -32,8 +32,6 @@ do
   do
     for t in $nthreads
     do
-      export OMP_PLACES=sockets
-      export OMP_PROC_BIND=close
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))
       do

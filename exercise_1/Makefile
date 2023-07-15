@@ -1,6 +1,6 @@
 # COMPILATION FLAGS
 # -----------------
-COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -march=native -fopenmp
+COMPILEFLAGS := -O3 -Wall -fstrict-aliasing -march=native -fopenmp
 SAVINGFLAGS :=
 # -----------------
 

@@ -11,8 +11,7 @@ Life::Life(const std::string &filename, int &_rows, int &_cols, int np, int rk):
 nTasks(np),
 rank(rk),
 rows(_rows),
-cols(_cols),
-lifeSize(_rows*_cols) {
+cols(_cols) {
 
     loRank = (rank - 1 + nTasks) % nTasks;
     upRank = (rank + 1) % nTasks;
@@ -26,20 +25,19 @@ lifeSize(_rows*_cols) {
 
     localRowsHalo = localRows + 2;
     localColsHalo = cols + 2;
-    localSizeHalo = localRowsHalo * localColsHalo;
 
     localState = new int [localSize]();
-    localObs = new int [localSizeHalo]();
-    localObsNext = new int [localSizeHalo]();
+    localObs = new int [localRowsHalo*localColsHalo]();
+    localObsNext = new int [localRowsHalo*localColsHalo]();
 
-    int offset = (rows%nTasks)*cols;
     if (rank == 0) {
-        auto *globalState = new int [lifeSize];
-        read_state(filename, globalState, lifeSize);
+        auto *globalState = new int [_rows*_cols];
+        read_state(filename, globalState, _rows*_cols);
 
         std::memcpy(localState, globalState, (localSize)*sizeof(int));
 
         for (int r = 1; r < nTasks; r++) {
+            int offset = (rows%nTasks)*cols;
             int add_offset = r == nTasks - 1 ? 1 : 0;
             MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
                      MPI_INT, r, 0,
