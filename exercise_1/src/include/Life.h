@@ -8,12 +8,11 @@ class Life {
 private:
 
     int nTasks;
-    int rank;
-    int loRank, upRank;
+    int rank, loRank, upRank;
 
     int rows, localRows, localRowsHalo;
     int cols, localColsHalo;
-    int lifeSize, localSize, localSizeHalo;
+    int localSize;
 
     int *localState;
     int *localObs;
