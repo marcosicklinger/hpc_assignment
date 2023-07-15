@@ -38,14 +38,14 @@ lifeSize(_rows*_cols) {
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
+    // master process reads initial grid and sends it to the other processes
     if (rank == 0) {
         auto *globalState = new int [lifeSize];
         read_state(filename, globalState, lifeSize);
 
-        // master process takes the first chuck of rows
         std::memcpy(localState, globalState, (localSize)*sizeof(int));
 
-        // sending of local data
+        // for the last process, it may be necessary to send an additional amount of rows
         int offset = (rows%nTasks)*cols;
         for (int r = 1; r < nTasks; r++) {
             int add_offset = r == nTasks - 1 ? 1 : 0;
@@ -55,9 +55,7 @@ lifeSize(_rows*_cols) {
         }
 
         delete [] globalState;
-    }
-    // non-zero-rank processes receives local grids
-    if (rank != 0) {
+    } else {
         MPI_Recv(localState, localSize,
                  MPI_INT,
                  0, 0,
@@ -215,5 +213,4 @@ void Life::haloExchange(){
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
                  localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
                  MPI_COMM_WORLD, &status2);
-//    MPI_Barrier(MPI_COMM_WORLD);
 }
