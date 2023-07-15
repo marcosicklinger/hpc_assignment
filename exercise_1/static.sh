@@ -32,7 +32,7 @@ do
   do
     for t in $nthreads
     do
-#      export OMP_PLACES=cores
+      export OMP_PLACES=sockets
       export OMP_PROC_BIND=close
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))

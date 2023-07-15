@@ -87,15 +87,31 @@ int Life::census(int x, int y) const {
 }
 
 void Life::staticStep() {
-    #pragma omp parallel for schedule(static) //collapse(2)
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++){
-            int local_population = 8 - (localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
-                                        localObs[x*localColsHalo + (y - 1)]                                             + localObs[x*localColsHalo + (y + 1)] +
-                                        localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)]);
-            int lives = (localObs[x*localColsHalo + y] == ALIVE && local_population == 2) || (local_population == 3);
-            localObsNext[x*localColsHalo + y] = !lives;
+            int x_star = x*localColsHalo + y;
+            int local_population = 8 - (localObs[x_star - localColsHalo - 1] + localObs[x_star - localColsHalo] + localObs[x_star - localColsHalo + 1] +
+                                        localObs[x_star - 1]                                                    + localObs[x_star + 1] +
+                                        localObs[x_star + localColsHalo - 1] + localObs[x_star + localColsHalo] + localObs[x_star + localColsHalo + 1]);
+            localObsNext[x_star] = !((localObs[x_star] == ALIVE && local_population == 2) || (local_population == 3));
         }
+    }
+
+}
+
+void Life::staticEvolution(int &lifetime, int &record_every) {
+    ++lifetime;
+    for (int age = 1; age < lifetime; age++) {
+        haloExchange();
+        computeHaloCols();
+        staticStep();
+        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
+        #ifdef SSAVE
+            if (age%record_every == 0) {
+                freezeGlobalState(age);
+            }
+        #endif
     }
 }
 
@@ -109,6 +125,27 @@ void Life::orderedStep() {
             computeHaloRows();
             computeHaloCols();
         }
+    }
+}
+
+void Life::orderedEvolution(int &lifetime, int &record_every){
+    try {
+        if (nTasks > 1) {
+            throw std::invalid_argument("To run the ordered evolution properly, the number of mpi processes must be equal to 1");
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cerr << e.what() << std::endl;
+    }
+    ++lifetime;
+    computeHaloRows();
+    computeHaloCols();
+    for (int age = 1; age < lifetime; age++) {
+        orderedStep();
+        #ifdef SSAVE
+            if (age%record_every == 0) {
+                freezeGlobalState(age);
+            }
+        #endif
     }
 }
 
@@ -151,42 +188,6 @@ void Life::freezeGlobalState(int &age) {
     delete [] globalState;
     delete [] recv_counts;
     delete [] displs;
-}
-
-void Life::staticEvolution(int &lifetime, int &record_every) {
-    ++lifetime;
-    for (int age = 1; age < lifetime; age++) {
-        haloExchange();
-        computeHaloCols();
-        staticStep();
-        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
-        #ifdef SSAVE
-            if (age%record_every == 0) {
-                freezeGlobalState(age);
-            }
-        #endif
-    }
-}
-
-void Life::orderedEvolution(int &lifetime, int &record_every){
-    try {
-        if (nTasks > 1) {
-            throw std::invalid_argument("To run the ordered evolution properly, the number of mpi processes must be equal to 1");
-        }
-    } catch (const std::invalid_argument& e) {
-        std::cerr << e.what() << std::endl;
-    }
-    ++lifetime;
-    computeHaloRows();
-    computeHaloCols();
-    for (int age = 1; age < lifetime; age++) {
-        orderedStep();
-        #ifdef SSAVE
-            if (age%record_every == 0) {
-                freezeGlobalState(age);
-            }
-        #endif
-    }
 }
 
 void Life::initializeObs(){
