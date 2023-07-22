@@ -85,7 +85,12 @@ int Life::census(int x, int y) const {
 }
 
 void Life::staticStep() {
-    #pragma omp parallel for schedule(static) collapse(2)
+//    #pragma omp parallel
+//    {
+//
+//    }
+
+    #pragma omp parallel for schedule(static) firstprivate(cols,localRows,localColsHalo) collapse(2)
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++){
             int x_star = x*localColsHalo + y;
@@ -96,6 +101,7 @@ void Life::staticStep() {
         }
     }
 
+    std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
 }
 
 void Life::staticEvolution(int &lifetime, int &record_every) {
@@ -104,7 +110,6 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
         haloExchange();
         computeHaloCols();
         staticStep();
-        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
         #ifdef SSAVE
             if (age%record_every == 0) {
                 freezeGlobalState(age);
