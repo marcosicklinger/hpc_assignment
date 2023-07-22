@@ -21,7 +21,7 @@ while getopts ":m:k:p:t:" opt; do
 done
 
 make clean
-make game SAVINGFLAGS="-DTSAVE -DSSAVE"
+make game SAVINGFLAGS="-DTSAVE"
 
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close

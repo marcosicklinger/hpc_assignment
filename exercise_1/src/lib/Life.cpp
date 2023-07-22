@@ -90,26 +90,38 @@ void Life::staticStep() {
 //
 //    }
 
-    #pragma omp parallel for schedule(static) firstprivate(cols,localRows,localColsHalo) collapse(2)
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++){
-            int x_star = x*localColsHalo + y;
-            int local_population = 8 - (localObs[x_star - localColsHalo - 1] + localObs[x_star - localColsHalo] + localObs[x_star - localColsHalo + 1] +
-                                        localObs[x_star - 1]                                                    + localObs[x_star + 1] +
-                                        localObs[x_star + localColsHalo - 1] + localObs[x_star + localColsHalo] + localObs[x_star + localColsHalo + 1]);
-            localObsNext[x_star] = !((localObs[x_star] == ALIVE && local_population == 2) || (local_population == 3));
+//            int x_star = x*localColsHalo + y;
+//            int local_population = 8 - (localObs[x_star - localColsHalo - 1] + localObs[x_star - localColsHalo] + localObs[x_star - localColsHalo + 1] +
+//                                        localObs[x_star - 1]                                                    + localObs[x_star + 1] +
+//                                        localObs[x_star + localColsHalo - 1] + localObs[x_star + localColsHalo] + localObs[x_star + localColsHalo + 1]);
+            int local_population = census(x, y);
+//            localObsNext[x_star] = !((localObs[x_star] == ALIVE && local_population == 2) || (local_population == 3));
+            if (local_population == 2 || local_population == 3) {
+                localObsNext[x*localColsHalo + y] = ALIVE;
+            } else {
+                localObsNext[x*localColsHalo + y] = DEAD;
+            }
         }
     }
-
-    std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
 }
 
 void Life::staticEvolution(int &lifetime, int &record_every) {
     ++lifetime;
+    unsigned int local_life_size = localRowsHalo*localColsHalo;
     for (int age = 1; age < lifetime; age++) {
         haloExchange();
         computeHaloCols();
         staticStep();
+//        std::memcpy(localObs, localObsNext, local_life_size*sizeof(int));
+        #pragma omp parallel for schedule(static) collapse(2)
+        for (int x = 1; x <= localRows; x++) {
+            for (int y = 1; y <= cols; y++) {
+                localObs[x*localColsHalo + y] = localObsNext[x*localColsHalo + y];
+            }
+        }
         #ifdef SSAVE
             if (age%record_every == 0) {
                 freezeGlobalState(age);
@@ -210,5 +222,5 @@ void Life::haloExchange (){
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
                  localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
                  MPI_COMM_WORLD, &status2);
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 }

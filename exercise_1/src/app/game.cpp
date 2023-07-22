@@ -81,7 +81,6 @@ void get_args(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-
     MPI_Init(&argc, &argv);
 
     int rank, n_tasks;
