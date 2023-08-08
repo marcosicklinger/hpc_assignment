@@ -99,7 +99,7 @@ void Life::staticStep() {
 //                                        localObs[x_star + localColsHalo - 1] + localObs[x_star + localColsHalo] + localObs[x_star + localColsHalo + 1]);
             int local_population = census(x, y);
 //            localObsNext[x_star] = !((localObs[x_star] == ALIVE && local_population == 2) || (local_population == 3));
-            if (local_population == 2 || local_population == 3) {
+            if ((localObs[x*localColsHalo + y] == ALIVE && local_population == 2) || local_population == 3) {
                 localObsNext[x*localColsHalo + y] = ALIVE;
             } else {
                 localObsNext[x*localColsHalo + y] = DEAD;
@@ -110,7 +110,7 @@ void Life::staticStep() {
 
 void Life::staticEvolution(int &lifetime, int &record_every) {
     ++lifetime;
-    unsigned int local_life_size = localRowsHalo*localColsHalo;
+//    unsigned int local_life_size = localRowsHalo*localColsHalo;
     for (int age = 1; age < lifetime; age++) {
         haloExchange();
         computeHaloCols();
