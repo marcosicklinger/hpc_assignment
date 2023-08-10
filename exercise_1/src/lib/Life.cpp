@@ -206,6 +206,7 @@ void Life::freezeGlobalState(int &age) {
 }
 
 void Life::initializeObs(){
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int x = 0; x < localRows; x++) {
         for(int y = 0; y < cols; y++) {
             localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
