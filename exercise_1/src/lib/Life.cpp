@@ -38,30 +38,32 @@ lifeSize(_rows*_cols) {
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
+    int *globalState = nullptr;
+    int *send_counts = nullptr;
+    int *displs = nullptr;
+
     // master process reads initial grid and sends it to the other processes
     if (rank == 0) {
-        auto *globalState = new int [lifeSize];
+        globalState = new int[rows*cols];
         read_state(filename, globalState, lifeSize);
 
-        std::memcpy(localState, globalState, (localSize)*sizeof(int));
+        send_counts = new int[nTasks];
+        displs = new int[nTasks];
 
-        // for the last process, it may be necessary to send an additional amount of rows
         int offset = (rows%nTasks)*cols;
-        for (int r = 1; r < nTasks; r++) {
+        for (int r = 0; r < nTasks; r++) {
             int add_offset = r == nTasks - 1 ? 1 : 0;
-            MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
-                     MPI_INT, r, 0,
-                     MPI_COMM_WORLD);
+            send_counts[r] = localSize + offset*add_offset;
+            displs[r] = localSize*r;
         }
-
-        delete [] globalState;
-    } else {
-        MPI_Recv(localState, localSize,
-                 MPI_INT,
-                 0, 0,
-                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+    // scattering of local grids to the other processes
+    MPI_Scatterv(globalState, send_counts, displs,
+                 MPI_INT,
+                 localState, localSize
+                 MPI_INT,
+                 0,
+                 MPI_COMM_WORLD);
 
     // all the processes initialize their own padded sub-grids
     initializeObs();
@@ -206,11 +208,10 @@ void Life::initializeObs(){
 }
 
 void Life::haloExchange(){
-    MPI_Status status1, status2;
     MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
                  localObs, localColsHalo, MPI_INT, loRank, 0,
-                 MPI_COMM_WORLD, &status1);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
                  localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
-                 MPI_COMM_WORLD, &status2);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 }
