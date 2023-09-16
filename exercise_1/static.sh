@@ -2,10 +2,10 @@
 
 ntrials=1
 map="socket"
-size="5"
+size="50"
 ntasks="1"
 nthreads="1"
-time=5
+time=100
 step=1
 #fname=./snapshot/snapshot_00000
 
