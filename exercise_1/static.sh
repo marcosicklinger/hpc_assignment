@@ -2,9 +2,9 @@
 
 ntrials=5
 map="socket"
-size="500"
+size="10000"
 ntasks="1"
-nthreads="2"
+nthreads="1 2 4 8 16"
 time=100
 step=1
 #fname=./snapshot/snapshot_00000
@@ -21,7 +21,7 @@ while getopts ":m:k:p:t:" opt; do
 done
 
 make clean
-make game SAVINGFLAGS="-DTSAVE -DSSAVE"
+make game SAVINGFLAGS="-DTSAVE"
 
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
