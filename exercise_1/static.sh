@@ -1,11 +1,11 @@
 #!/bin/bash
 
-ntrials=5
+ntrials=1
 map="socket"
-size="10000"
+size="5"
 ntasks="1"
-nthreads="1 2 4 8 16"
-time=100
+nthreads="1"
+time=5
 step=1
 #fname=./snapshot/snapshot_00000
 
@@ -21,7 +21,7 @@ while getopts ":m:k:p:t:" opt; do
 done
 
 make clean
-make game SAVINGFLAGS="-DTSAVE"
+make game SAVINGFLAGS="-DTSAVE -DSSAVE"
 
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close

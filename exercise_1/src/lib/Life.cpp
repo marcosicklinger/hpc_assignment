@@ -30,29 +30,55 @@ cols(_cols) {
     localObs = new int [localRowsHalo*localColsHalo]();
     localObsNext = new int [localRowsHalo*localColsHalo]();
 
+    int *globalState = nullptr;
+    int *send_counts = nullptr;
+    int *displs = nullptr;
+
     if (rank == 0) {
-        auto *globalState = new int [_rows*_cols];
+        globalState = new int[rows*cols];
         read_state(filename, globalState, _rows*_cols);
 
-        std::memcpy(localState, globalState, (localSize)*sizeof(int));
+        send_counts = new int[nTasks];
+        displs = new int[nTasks];
 
-        for (int r = 1; r < nTasks; r++) {
-            int offset = (rows%nTasks)*cols;
+        int offset = (rows%nTasks)*cols;
+        for (int r = 0; r < nTasks; r++) {
             int add_offset = r == nTasks - 1 ? 1 : 0;
-            MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
-                     MPI_INT, r, 0,
-                     MPI_COMM_WORLD);
+            send_counts[r] = localSize + offset*add_offset;
+            displs[r] = localSize*r;
         }
+    }
 
-        delete [] globalState;
-    }
-    if (rank != 0) {
-        MPI_Recv(localState, localSize,
-                 MPI_INT,
-                 0, 0,
-                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Scatterv(globalState, send_counts, displs,
+                MPI_INT,
+                localState, localSize,
+                MPI_INT,
+                0,
+                MPI_COMM_WORLD);
+
+//    if (rank == 0) {
+//        auto *globalState = new int [_rows*_cols];
+//        read_state(filename, globalState, _rows*_cols);
+//
+//        std::memcpy(localState, globalState, (localSize)*sizeof(int));
+//
+//        for (int r = 1; r < nTasks; r++) {
+//            int offset = (rows%nTasks)*cols;
+//            int add_offset = r == nTasks - 1 ? 1 : 0;
+//            MPI_Send(globalState + r*localSize, localSize + offset*add_offset,
+//                     MPI_INT, r, 0,
+//                     MPI_COMM_WORLD);
+//        }
+//
+//        delete [] globalState;
+//    }
+//    if (rank != 0) {
+//        MPI_Recv(localState, localSize,
+//                 MPI_INT,
+//                 0, 0,
+//                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//    }
+//    MPI_Barrier(MPI_COMM_WORLD);
 
     initializeObs();
 }
