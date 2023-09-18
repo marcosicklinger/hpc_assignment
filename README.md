@@ -110,7 +110,7 @@ The make file contains a few applications useful to set upe the directory:
 ### How to run
 
 #### Compiling the program
-Using the command `srun -n 1 make all` (in the `exercise_2` directory) will create the executables in the current directory. It makes use of the applications `oblas.x` and `mkl.x` which directly compiles the code with the needed libraries and flags.
+Using the command `srun -n 1 make all PREC=precision` (in the `exercise_2` directory) will create the executables in the current directory. The value `precision` can be either `"-DUSE_SINGLE"` or `"-DUSE_FLOAT"`. It makes use of the applications `oblas.x` and `mkl.x` in the makefile, which directly compiles the code with the needed libraries and flags.
 
 #### Running the program
 In order to run the program, use `srun -n 1 ./executable_name K1 K2 K3` (in the `exercise_2` directory), where:
