@@ -118,7 +118,7 @@ def main():
         i += 1
     fig1.text(0.5, 1 - 0.08, 'cores', ha='center', fontsize=14)
     fig1.text(0.04, 0.5, 'speed-up', va='center', rotation='vertical', fontsize=14)
-    fig2.text(0.5, 1 - 0.08, 'size', ha='center', fontsize=14)
+    fig2.text(0.5, 1 - 0.08, 'cores', ha='center', fontsize=14)
     fig2.text(0.04, 0.5, 'relative change', va='center', rotation='vertical', fontsize=14)
     plt.xticks()
     plt.yticks()

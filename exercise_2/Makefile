@@ -6,15 +6,15 @@ PREC := -DUSE_FLOAT
 # SETUP OF DIRECTORY
 # ------------------
 setup:
-	mkdir -p weak/single weak/double
-	mkdir -p strong/single strong/double
+	mkdir -p sizes/single sizes/double
+	mkdir -p cores/single cores/double
 # ------------------
 
 # EXECUTION
 # ---------
 executable:
-	@chmod +x strong.sh
-	@chmod +x weak.sh
+	@chmod +x cores.sh
+	@chmod +x sizes.sh
 # ---------
 
 # COMPILE ALL
@@ -44,10 +44,10 @@ oblas.x: gemm.cpp
 
 clean_exe:
 	@rm -rf *.x
-clean_strong:
-	@rm -rf strong/double/*.txt
-	@rm -rf strong/single/*.txt
-clean_weak:
-	@rm -rf weak/double/*.txt
-	@rm -rf	weak/single/*.txt
+clean_cores:
+	@rm -rf cores/double/*.txt
+	@rm -rf cores/single/*.txt
+clean_sizes:
+	@rm -rf sizes/double/*.txt
+	@rm -rf	sizes/single/*.txt
 # --------

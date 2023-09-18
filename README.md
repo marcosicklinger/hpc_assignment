@@ -76,13 +76,13 @@ The purpose of this task is to compare the performance of OpenBLAS and MKL libra
 The second exercise directory possesses the following structure:
 ```angular2html
 ├── analysis
-│   ├── strong.py
-│   └── weak.py
+│   ├── cores.py
+│   └── sizes.py
 ├── gemm.c
 ├── gemm.cpp
 ├── Makefile
-├── strong.sh
-└── weak.sh
+├── cores.sh
+└── sizes.sh
 ``` 
 Four files, one makefile, 2 bash scripts (see explanation below) and two C/C++ files, are located right in the first level of the directory.\
 The `analysis` directory contains python scripts for graphical analysis of the data.
@@ -95,17 +95,17 @@ The `analysis` directory contains python scripts for graphical analysis of the d
 The make file contains a few applications useful to set upe the directory:
 - `setup`: running `make setup` will create a tree of directories (inside the exercise main directory) needed for storing useful time measurements for both single and double precision. 
     ```angular2html
-    ├── strong
+    ├── cores
     │   ├── double
     │   └── single
-    └── weak
+    └── sizes
         ├── double
         └── single
     ```
-  `weak` directory is used size scaling simulations, while `strong` for core scaling simulations.
-- `executable`: running `make executable` will grant executable permission to the scripts `weak.sh` and `strong.sh`.
+  `sizes` directory is used size scaling simulations, while `cores` for core scaling simulations.
+- `executable`: running `make executable` will grant executable permission to the scripts `sizes.sh` and `cores.sh`.
 - `all`: application for the program compilation.
-- Other applications are `clean_exe`, `clean_weak`, `clean_strong`.
+- Other applications are `clean_exe`, `clean_sizes`, `clean_cores`.
 
 ### How to run
 
