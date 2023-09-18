@@ -2,7 +2,7 @@
 
 ntrials=1
 map="socket"
-size="50"
+size="5"
 ntasks="1"
 nthreads="1"
 time=100
@@ -35,7 +35,7 @@ do
       export OMP_NUM_THREADS=$t
       for ((i=0; i<ntrials; i++))
       do
-        mpirun --map-by socket -np 1 src/exe/game.x -e 1 -i -r -h "$s" -w "$s" -n $time -s $step >> time/static.txt
+        mpirun --map-by core -np 2 src/exe/game.x -e 1 -i -r -h "$s" -w "$s" -n $time -s $step >> time/static.txt
       done
     done
   done

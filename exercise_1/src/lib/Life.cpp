@@ -56,6 +56,7 @@ cols(_cols) {
                 0,
                 MPI_COMM_WORLD);
 
+
 //    if (rank == 0) {
 //        auto *globalState = new int [_rows*_cols];
 //        read_state(filename, globalState, _rows*_cols);
@@ -81,6 +82,10 @@ cols(_cols) {
 //    MPI_Barrier(MPI_COMM_WORLD);
 
     initializeObs();
+
+    delete [] globalState;
+    delete [] send_counts;
+    delete [] displs;
 }
 
 Life::~Life() {
@@ -142,12 +147,15 @@ void Life::staticEvolution(int &lifetime, int &record_every) {
         computeHaloCols();
         staticStep();
 //        std::memcpy(localObs, localObsNext, local_life_size*sizeof(int));
-        #pragma omp parallel for schedule(static) collapse(2)
+        #pragma omp parallel for schedule(static)
         for (int x = 1; x <= localRows; x++) {
-            for (int y = 1; y <= cols; y++) {
-                localObs[x*localColsHalo + y] = localObsNext[x*localColsHalo + y];
-            }
+            std::memcpy(localObs + x*cols, localObsNext + x*cols, cols*sizeof(int));
         }
+//        for (int x = 1; x <= localRows; x++) {
+//            for (int y = 1; y <= cols; y++) {
+//                localObs[x*localColsHalo + y] = localObsNext[x*localColsHalo + y];
+//            }
+//        }
         #ifdef SSAVE
             if (age%record_every == 0) {
                 freezeGlobalState(age);
@@ -191,8 +199,14 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
 }
 
 void Life::freezeGlobalState(int &age) {
+//    for (int x = 1; x <= localRows; x++) {
+//        std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(int));
+//    }
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int x = 1; x <= localRows; x++) {
-        std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(int));
+        for (int y = 1; y <= cols; y++) {
+            localState[(x - 1)*cols + (y - 1)] = localObs[x*localColsHalo + y];
+        }
     }
 
     int *globalState = nullptr;
@@ -242,12 +256,11 @@ void Life::initializeObs(){
 }
 
 void Life::haloExchange (){
-    MPI_Status status1, status2;
     MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
                  localObs, localColsHalo, MPI_INT, loRank, 0,
-                 MPI_COMM_WORLD, &status1);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
                  localObs + (localRowsHalo - 1)*localColsHalo, localColsHalo, MPI_INT, upRank, 1,
-                 MPI_COMM_WORLD, &status2);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Barrier(MPI_COMM_WORLD);
 }
