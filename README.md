@@ -45,15 +45,23 @@ The make file contains a few applications useful to set upe the directory:
   - `snapshot`: should contain life's snapshots that are saved during a run;
   - `simulation`: can be used as directory to save life stories.
 - `executable`: running `make executable` will grant executable permission to the scripts `ordered.sh`, `ompscal.sh` and `mpiscal.sh`.
-- `game`: running `make game SAVINGFLAGS=opt` will create a game executable in `src/exe`. It makes use of the application `src/exe/game.x` which directly compiles the code with the needed libraries and flags; `opt` takes the following values:
-  - `"-DTSAVE""`: directive for saving time measurements;
-  - `"-DSSAVE""`: directive for saving life's snapshots.
+- `game`: is the application for the program compilation.
 - Other applications are `clean_exe`, `clean_time`, `clean_snapshot`, `clean_sim` are needed for cleaning subdirectories; `clean` uses all of them but `clean_sim`. The `simulation` directory is meant for processing data on local hosts, so the user is free to save as many life stories as needed.
 
-**_Scripts_** 
-- `ordered.sh`: runs ordered evolution;
-- `ompscal.sh`: runs OpenMP scalability simulations;
-- `mpiscal.sh`: runs OpenMPI scalability simulations.
+### How to run
+
+#### Compiling the program
+Using the command `srun -n 1 make game SAVINGFLAGS=opt` (in the `exercise_1` directory) will create a game executable in `src/exe`. It makes use of the application `src/exe/game.x` which directly compiles the code with the needed libraries and flags; `opt` takes the following values:
+  - `"-DTSAVE""`: directive for saving time measurements;
+  - `"-DSSAVE""`: directive for saving life's snapshots.
+
+#### Running the program
+In order to run the program, use a command of the type: `mpirun <options> src/exe/game.x -e evolution -i -r -h height -w width -n time -s save` (in the `exercise_1` directory), where:
+  - `evolution` values determines if the run is ordered (`evolution=0`) or not (`evolution=1`, or different from 0);
+  - the combined option `-i -r` allows for initialization (`-i`) and evolution (`-r`);
+  - `-h height -w width` determines the size of the grid;
+  - `time` is the number of time iterations of the simulation;
+  - `save` determines the frequency of the snapshot writes.
 
 #### Implementation details
 The following module was exploited for the runs:
@@ -96,12 +104,19 @@ The make file contains a few applications useful to set upe the directory:
     ```
   `weak` directory is used size scaling simulations, while `strong` for core scaling simulations.
 - `executable`: running `make executable` will grant executable permission to the scripts `weak.sh` and `strong.sh`.
-- `all`: running `make all` will create the executables in the current directory. It makes use of the applications `oblas.x` and `mkl.x` which directly compiles the code with the needed libraries and flags.
+- `all`: application for the program compilation.
 - Other applications are `clean_exe`, `clean_weak`, `clean_strong`.
 
-**_Scripts_** 
-- `weak.sh`: runs size scaling analysis;
-- `strong.sh`: runs core scaling analysis;
+### How to run
+
+#### Compiling the program
+Using the command `srun -n 1 make all` (in the `exercise_2` directory) will create the executables in the current directory. It makes use of the applications `oblas.x` and `mkl.x` which directly compiles the code with the needed libraries and flags.
+
+#### Running the program
+In order to run the program, use `srun -n 1 ./executable_name K1 K2 K3` (in the `exercise_2` directory), where:
+
+- `executable_name` should be either `oblas.x` or `mkl.x`, according to the compilation step described above;
+- `K*` are the matrices linear sizes.
 
 #### Implementation details
 The following module was exploited for the runs:
