@@ -67,6 +67,7 @@ void read_state(const std::string &filename, int *state, int size){
     for (int n = 0; n < size; n++) {
         state[n] = static_cast<int>(file_pgm[n])/255;
     }
+    delete [] file_pgm;
 }
 
 void pad_age_string(std::string &age_string) {

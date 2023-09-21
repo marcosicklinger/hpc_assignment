@@ -14,4 +14,8 @@ add_executable(hpc_assignment
         exercise_1/src/include/Life.h
         exercise_1/src/lib/Life.cpp
         exercise_2/gemm.cpp
-        exercise_2/gemm.c)
+        exercise_2/gemm.c
+        exercise_1/src/lib/SerialLife.cpp
+        exercise_1/src/include/SerialLife.h
+        exercise_1/src/app/serial_game.cpp
+)

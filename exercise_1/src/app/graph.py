@@ -37,8 +37,8 @@ def plot_time(N, T, ERR, size, mod):
         # ax.plot(N, t)
         line, _, _ = ax.errorbar(n, t, err, marker='s', markersize=7.5, linewidth=1.5, elinewidth=2, capsize=0,
                                  label='{}x{}'.format(size[count][0], size[count][1]))
-        ax.plot([i for i in range(1, np.max(N[0]) + 1)], [T[count][0] / i for i in range(1, np.max(N[0]) + 1)],
-                color=line.get_color(), label='{}x{} ideal'.format(size[count][0], size[count][1]), linestyle='dashed')
+        # ax.plot([i for i in range(1, np.max(N[0]) + 1)], [T[count][0] / i for i in range(1, np.max(N[0]) + 1)],
+        #         color=line.get_color(), label='{}x{} ideal'.format(size[count][0], size[count][1]), linestyle='dashed')
         count += 1
     for tick in ax.get_xticklabels():
         tick.set_rotation(0)
@@ -59,6 +59,7 @@ def plot_weak(N, T, ERR, size, mod):
         count += 1
     for tick in ax.get_xticklabels():
         tick.set_rotation(0)
+    ax.set_ylim([0, 100])
     xlabel = "mpi tasks"
     ax.set_xlabel(xlabel, fontsize=14)
     ax.set_ylabel('time (s)', fontsize=14)

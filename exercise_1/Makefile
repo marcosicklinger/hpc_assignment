@@ -1,6 +1,6 @@
 # COMPILATION FLAGS
 # -----------------
-COMPILEFLAGS := -O2 -Wall -Wstrict-aliasing -march=native -fopenmp
+COMPILEFLAGS := -O3 -Wall -Wstrict-aliasing -march=native -fopenmp
 SAVINGFLAGS :=
 # -----------------
 
@@ -19,6 +19,11 @@ game: src/exe/game.x
 
 src/exe/game.x: src/app/game.cpp src/lib/Life.cpp src/lib/utils.cpp
 	@mpicc $(COMPILEFLAGS) $(SAVINGFLAGS) -o $@ $^ -lstdc++
+
+serial_game: src/exe/serial_game.x
+
+src/exe/serial_game.x: src/app/serial_game.cpp src/lib/SerialLife.cpp src/lib/utils.cpp
+	@gcc -g $(COMPILEFLAGS) $(SAVINGFLAGS) -o $@ $^ -lstdc++
 # -------------------
 
 # EXECUTION
