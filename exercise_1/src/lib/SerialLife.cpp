@@ -20,6 +20,7 @@ lifeSize(_rows*_cols)
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
+    // reading of initial grid
     auto *globalState = new int [lifeSize];
     read_state(filename, globalState, lifeSize);
 
@@ -27,6 +28,7 @@ lifeSize(_rows*_cols)
 
     delete [] globalState;
 
+    // initialization of padded grids
     initializeObs();
 }
 
@@ -36,6 +38,7 @@ SerialLife::~SerialLife() {
     delete [] localObs;
 }
 
+// computation of the alive neighbors
 int SerialLife::census(int x, int y) const {
     int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
                localObs[x*localColsHalo + (y - 1)]                                                   + localObs[x*localColsHalo + (y + 1)] +
@@ -43,6 +46,7 @@ int SerialLife::census(int x, int y) const {
     return (8 - dead);
 }
 
+// single step of static evolution
 void SerialLife::staticStep() {
     #pragma omp parallel for schedule(static) collapse(2)
         for (int x = 1; x <= rows; x++) {
@@ -56,10 +60,21 @@ void SerialLife::staticStep() {
         }
 }
 
+// single step of ordered evolution
 void SerialLife::orderedStep() {
-
+    for (int x = 1; x <= rows; x++) {
+        for (int y = 1; y <= cols; y++) {
+            int local_population = census(x, y);
+            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
+            localObs[x*localColsHalo + y] = lives ? ALIVE : DEAD;
+            computeHaloRows();
+            computeHaloCols();
+        }
+    }
 }
 
+// static evolution
 void SerialLife::staticEvolution(int &lifetime, int &record_every) {
     for (int age = 1; age < lifetime; age++) {
         computeHaloRows();
@@ -77,10 +92,22 @@ void SerialLife::staticEvolution(int &lifetime, int &record_every) {
     freezeGlobalState(lifetime);
 }
 
+// ordered evolution
 void SerialLife::orderedEvolution(int &lifetime, int &record_every) {
-
+    computeHaloRows();
+    computeHaloCols();
+    for (int age = 1; age < lifetime; age++) {
+        orderedStep();
+        #ifdef SSAVE
+                if (age%record_every == 0) {
+                        freezeGlobalState(age);
+                    }
+        #endif
+    }
+    freezeGlobalState(lifetime);
 }
 
+// system saving through utility functions
 void SerialLife::freezeGlobalState(int &age) {
     for (int x = 1; x <= rows; x++) {
         std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(int));
@@ -105,16 +132,13 @@ void SerialLife::initializeObs() {
     }
 }
 
-
+// computation of padded columns
 void SerialLife::computeHaloRows() {
-//    for (int y = 1; y <= cols; y++) {
-//        localObs[y] = localObs[rows*localColsHalo + y];
-//        localObs[(localRowsHalo - 1)*localColsHalo + y] = localObs[localColsHalo + y];
-//    }
     std::memcpy(localObs, localObs + rows*localColsHalo, localColsHalo*sizeof(int));
     std::memcpy(localObs + (localRowsHalo - 1)*localColsHalo, localObs + localColsHalo, localColsHalo*sizeof(int));
 }
 
+// computation of padded columns
 void SerialLife::computeHaloCols() {
     for (int x = 0; x < localRowsHalo; x++) {
         localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];

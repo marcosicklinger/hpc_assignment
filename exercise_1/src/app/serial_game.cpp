@@ -6,6 +6,7 @@
 #include <chrono>
 #include <omp.h>
 
+// default values for initialization and run duration
 bool init = false;
 bool run = false;
 int rows = SIZE;

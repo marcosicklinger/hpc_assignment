@@ -5,6 +5,7 @@
 #include "../include/utils.h"
 #include "../include/consts.h"
 
+// generate random life pattern
 int * generate_random_life(int &rows, int &cols) {
     int life_size = rows * cols;
     auto *world = new int[life_size];
@@ -15,7 +16,9 @@ int * generate_random_life(int &rows, int &cols) {
     return world;
 }
 
+// write state to file
 void write_state(std::string &filename, const int *data, int &height, int &width) {
+    // create and check output stream instance
     std::ofstream state(filename + ".pgm", std::ios_base::out | std::ios::binary | std::ios_base::trunc);
     try {
         if (!state) {
@@ -27,20 +30,25 @@ void write_state(std::string &filename, const int *data, int &height, int &width
 
     unsigned char max_pixel_value = 255;
     int max_gray_value = static_cast<int>(max_pixel_value);
+    // create header in file
     state << "P5\n" << width << " " << height << "\n" << max_gray_value << "\n";
 
     int state_size = height*width;
     auto *writable_data = new unsigned char [state_size];
     for (int n = 0; n < state_size; n++) {
+        // cast data to char
         writable_data[n] = static_cast<unsigned char>(data[n])*max_pixel_value;
     }
 
+    // write data to file
     state.write(reinterpret_cast<const char*>(writable_data), state_size);
     delete [] writable_data;
     state.close();
 }
 
+// read data from pgm file
 void read_pgm_file (const std::string &filename, unsigned char *dest) {
+    // create and check input stream instance
     std::ifstream life_img(filename + ".pgm", std::ios::binary);
     try {
         if (!life_img) {
@@ -57,10 +65,7 @@ void read_pgm_file (const std::string &filename, unsigned char *dest) {
     life_img.close();
 }
 
-void write_time(int rows, int cols, int n_threads, int n_procs, double time){
-    std::cout << rows << "\t" << cols << "\t" <<  n_procs << "\t" <<  n_threads << "\t" << time << std::endl;
-}
-
+// read data and store it to a buffer
 void read_state(const std::string &filename, int *state, int size){
     auto *file_pgm = new unsigned char[size];
     read_pgm_file(filename, file_pgm);
@@ -70,6 +75,7 @@ void read_state(const std::string &filename, int *state, int size){
     delete [] file_pgm;
 }
 
+// pad age (evolution iteration count) to format 0000x
 void pad_age_string(std::string &age_string) {
     int num_digs_in_age = static_cast<int>(age_string.length());
     if (num_digs_in_age < 5) {
