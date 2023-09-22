@@ -40,7 +40,7 @@ The make file contains a few applications useful to set upe the directory:
     - `time`: should contain time measurements;
     - `snapshot`: should contain life's snapshots that are saved during a run;
     - `simulation`: can be used as directory to save life stories.
-- `executable`: running `make executable` will grant executable permission to the scripts `ordered.sh`, `ompscal.sh` and `mpiscal.sh`.
+- `executable`: running `make executable` will grant executable permission to the scripts `mpiscal_nth1.sh` (strong MPI with single thread per MPI task, and --map-by core binding), `mpiscal_nth64.sh` (strong MPI with 64 threads per MPI task, and --map-by socket binding) `mpiweak.sh` (weak MPI with 64 threads per MPI task and --map-by socket binding), and `ompscal.sh` (OpenMP scalability).
 - `game`: is the application for the program compilation.
 - Other applications are `clean_exe`, `clean_time`, `clean_snapshot`, `clean_sim` are needed for cleaning subdirectories; `clean` uses all of them but `clean_sim`. The `simulation` directory is meant for processing data on local hosts, so the user is free to save as many life stories as needed.
 
