@@ -1,30 +1,32 @@
 #!/bin/bash
 
-#SBATCH --job-name="weakmarco"
-#SBATCH --output="log.out"
+#SBATCH --job-name="e1omp"
+#SBATCH --output="omp.out"
 #SBATCH --partition=EPYC
-#SBATCH	--nodes=3
-#SBATCH --tasks-per-node=2
-#SBATCH --ntasks=6
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
-#SBATCH --cpus-per-task=64
 #SBATCH --time=02:00:00
 
-srun -n 1 make clean
-srun -n 1 make game SAVINGFLAGS="-DTSAVE"
+module load architecture/AMD
+module load openMPI/4.1.5/gnu/12.2.1
 
-ntrials=10
-time=100
-for s in 10000 15000 20000
+mpirun -np 1 make clean_exe
+mpirun -np 1 make game SAVINGFLAGS="-DTSAVE"
+
+ntrials=4
+T=500
+
+export OMP_PLACES=cores
+export OMP_PROC_BIND=close
+for s in 20000
 do
-  for t in 1 2 4 8 16 32 48 64 96 128
+  for t in 1 4 8 16 32 48 64
   do
-#    export OMP_PLACES=sockets
-    export OMP_PROC_BIND=close
     export OMP_NUM_THREADS=$t
     for ((i=0; i<ntrials; i++))
     do
-      mpirun --map-by socket -np $SLURM_NTASKS src/exe/game.x -e 1 -i -r -h $s -w $s -n $time >> time/ompscal.txt
+      mpirun -np 1 --map-by socket src/exe/game.x -e 1 -i -r -h $s -w $s -n $T -s 100 >> time/time_file.txt
     done
   done
 done

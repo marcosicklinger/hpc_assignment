@@ -7,6 +7,7 @@
 #include "../include/utils.h"
 #include "../include/consts.h"
 
+
 Life::Life(const std::string &filename, int &_rows, int &_cols, int np, int rk):
 nTasks(np),
 rank(rk),
@@ -38,11 +39,13 @@ lifeSize(_rows*_cols) {
     localObs = new int [localSizeHalo]();
     localObsNext = new int [localSizeHalo]();
 
+    // initialize buffers and displacements
     int *globalState = nullptr;
     int *send_counts = nullptr;
     int *displs = nullptr;
 
-    // master process reads initial grid and sends it to the other processes
+    // master process computes chunks' information to send
+    // to the other processes
     if (rank == 0) {
         globalState = new int[rows*cols];
         read_state(filename, globalState, lifeSize);
@@ -57,13 +60,18 @@ lifeSize(_rows*_cols) {
             displs[r] = localSize*r;
         }
     }
-    // scattering of local grids to the other processes
+
+    // scatter all sub-grids to all processes
     MPI_Scatterv(globalState, send_counts, displs,
                  MPI_INT,
-                 localState, localSize
+                 localState, localSize,
                  MPI_INT,
                  0,
                  MPI_COMM_WORLD);
+
+    delete [] globalState;
+    delete [] send_counts;
+    delete [] displs;
 
     // all the processes initialize their own padded sub-grids
     initializeObs();
@@ -75,6 +83,7 @@ Life::~Life() {
     delete [] localObs;
 }
 
+// (naive) computation of padded columns
 void Life::computeHaloRows() {
     for (int y = 1; y <= cols; y++) {
         localObs[y] = localObs[localRows*localColsHalo + y];
@@ -82,6 +91,7 @@ void Life::computeHaloRows() {
     }
 }
 
+// computation of padded columns
 void Life::computeHaloCols() {
     for (int x = 0; x < localRowsHalo; x++) {
         localObs[x*localColsHalo] = localObs[x*localColsHalo + localColsHalo - 2];
@@ -89,25 +99,40 @@ void Life::computeHaloCols() {
     }
 }
 
+// computation of the alive neighbors
 int Life::census(int x, int y) const {
-    int dead = localObs[(x - 1)*localColsHalo + (y - 1)] + localObs[(x - 1)*localColsHalo + y] + localObs[(x - 1)*localColsHalo + (y + 1)] +
-               localObs[x*localColsHalo + (y - 1)]                                                   + localObs[x*localColsHalo + (y + 1)] +
-               localObs[(x + 1)*localColsHalo + (y - 1)] + localObs[(x + 1)*localColsHalo + y] + localObs[(x + 1)*localColsHalo + (y + 1)];
+    auto x_left = x - 1;
+    auto x_right = x + 1;
+    auto y_up = y - 1;
+    auto y_down = y + 1;
+
+    auto nb1 = localObs[x_left*localColsHalo + y_up];
+    auto nb2 = localObs[x_left*localColsHalo + y];
+    auto nb3 = localObs[x_left*localColsHalo + y_down];
+    auto nb4 = localObs[x*localColsHalo + y_up];
+    auto nb5 = localObs[x*localColsHalo + y_down];
+    auto nb6 = localObs[x_right*localColsHalo + y_up];
+    auto nb7 = localObs[x_right*localColsHalo + y];
+    auto nb8 = localObs[x_right*localColsHalo + y_down];
+    auto dead = nb1 + nb2 + nb3 + nb4 + nb5 + nb6 + nb7 + nb8;
+
     return (8 - dead);
 }
 
+// single step of static evolution
 void Life::staticStep() {
     #pragma omp parallel for schedule(static) collapse(2)
-        for (int x = 1; x <= localRows; x++) {
-            for (int y = 1; y <= cols; y++){
-                int local_population = census(x, y);
-                bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
-                             (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
-                localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
-            }
+    for (int x = 1; x <= localRows; x++) {
+        for (int y = 1; y <= cols; y++){
+            int local_population = census(x, y);
+            bool lives = (localObs[x*localColsHalo + y] == ALIVE && (local_population == 2 || local_population == 3)) ||
+                         (localObs[x*localColsHalo + y] == DEAD && local_population == 3);
+            localObsNext[x*localColsHalo + y] = lives ? ALIVE : DEAD;
         }
+    }
 }
 
+// single step of ordered evolution
 void Life::orderedStep() {
     for (int x = 1; x <= localRows; x++) {
         for (int y = 1; y <= cols; y++) {
@@ -121,6 +146,7 @@ void Life::orderedStep() {
     }
 }
 
+// system saving through utility functions
 void Life::freezeGlobalState(int &age) {
     for (int x = 1; x <= localRows; x++) {
         std::memcpy(localState + (x - 1)*cols, localObs + x*localColsHalo + 1, cols*sizeof(int));
@@ -160,32 +186,29 @@ void Life::freezeGlobalState(int &age) {
     delete [] globalState;
     delete [] recv_counts;
     delete [] displs;
+
 }
 
+// static evolution
 void Life::staticEvolution(int &lifetime, int &record_every) {
-    ++lifetime;
     for (int age = 1; age < lifetime; age++) {
         haloExchange();
         computeHaloCols();
         staticStep();
-        std::memcpy(localObs, localObsNext, localColsHalo*localRowsHalo*sizeof(int));
+        int *swap = localObsNext;
+        localObsNext = localObs;
+        localObs = swap;
         #ifdef SSAVE
-            if (age%record_every == 0) {
+            if (age%record_every == 0 || age == lifetime) {
                 freezeGlobalState(age);
             }
         #endif
     }
+    freezeGlobalState(lifetime);
 }
 
+// ordered evolution
 void Life::orderedEvolution(int &lifetime, int &record_every){
-    try {
-        if (nTasks > 1) {
-            throw std::invalid_argument("To run the ordered evolution properly, the number of mpi processes must be equal to 1");
-        }
-    } catch (const std::invalid_argument& e) {
-        std::cerr << e.what() << std::endl;
-    }
-    ++lifetime;
     computeHaloRows();
     computeHaloCols();
     for (int age = 1; age < lifetime; age++) {
@@ -198,7 +221,9 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
     }
 }
 
+// initialize observations' buffers
 void Life::initializeObs(){
+    #pragma omp parallel for schedule(static)
     for (int x = 0; x < localRows; x++) {
         for(int y = 0; y < cols; y++) {
             localObs[(x + 1) * localColsHalo + (y + 1)] = localState[x * cols + y];
@@ -207,8 +232,9 @@ void Life::initializeObs(){
 
 }
 
+//  implementation of message passing approach
 void Life::haloExchange(){
-    MPI_Sendrecv(localObs + (localRowsHalo - 2)*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
+    MPI_Sendrecv(localObs + rows*localColsHalo, localColsHalo, MPI_INT, upRank, 0,
                  localObs, localColsHalo, MPI_INT, loRank, 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Sendrecv(localObs + localColsHalo, localColsHalo, MPI_INT, loRank, 1,
