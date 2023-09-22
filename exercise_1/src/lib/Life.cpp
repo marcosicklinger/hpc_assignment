@@ -221,7 +221,7 @@ void Life::orderedEvolution(int &lifetime, int &record_every){
     }
 }
 
-// initialize observations' buffers
+// initialize observations
 void Life::initializeObs(){
     #pragma omp parallel for schedule(static)
     for (int x = 0; x < localRows; x++) {

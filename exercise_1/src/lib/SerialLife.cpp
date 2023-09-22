@@ -123,6 +123,7 @@ void SerialLife::freezeGlobalState(int &age) {
     delete [] globalState;
 }
 
+// initialize observations
 void SerialLife::initializeObs() {
     #pragma omp parallel for schedule(static)
     for (int x = 0; x < rows; x++) {
