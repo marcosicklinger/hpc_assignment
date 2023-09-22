@@ -47,16 +47,7 @@ def get_gflops_stats(size, data):
 def main():
     parser = argparse.ArgumentParser(description='Parse args for plotting time data')
     parser.add_argument('--prec', type=str, help='precision')
-    # parser.add_argument('--mkl_path', type=str, help='path to txt file')
-    # parser.add_argument('--oblas_path', type=str, help='path to txt file')
-    # parser.add_argument('--plbind', type=str, help='places\policy')
     args = parser.parse_args()
-
-    TPP = 0
-    if args.prec == 'single':
-        TPP = 5324.8
-    if args.prec == 'core_scaling':
-        TPP = 2662.4
 
     # places = [
     #     # 's',
@@ -80,32 +71,25 @@ def main():
     # }
 
     places = [
-        # 's',
+        's',
         'c',
-        # 't'
+        't'
     ]
-    pbindings = ['sw', 'cw']
-    pols = ['ss',
-            'sc',
-            'cs',
-            'cc',
-            'ts',
-            'tc']
+    pbindings = ['s', 'c']
     places_binding_dict = {
-        # 'ss': 'socket/spread',
-        # 'sc': 'sockets/close',
-        'csw': 'cores/spread',
-        'ccw': 'cores/close',
-        # 'ts': 'threads/spread',
-        # 'tc': 'threads/close'
+        'ss': 'socket/spread',
+        'sc': 'sockets/close',
+        'cs': 'cores/spread',
+        'cc': 'cores/close',
+        'ts': 'threads/spread',
+        'tc': 'threads/close'
     }
 
-    fig1, ax1 = plt.subplots(1, 1, figsize=(9, 5))
-    fig2, ax2 = plt.subplots(1, 1, figsize=(9, 5))
+    fig1, ax1 = plt.subplots(1, 3, figsize=(15, 4.5))
+    fig2, ax2 = plt.subplots(1, 3, figsize=(15, 4.5))
     i = 0
 
-    # TPP_c = 2662.4
-    TPP_c = 1997/2
+    TPP_c = 2662.4
     if args.prec == 'single': TPP_c *= 2
     print(TPP_c)
     for place in places:
@@ -147,21 +131,21 @@ def main():
 
                 REL += [(s_mean_mkl - s_mean_oblas)/s_mean_oblas]
 
-            plot_gflops(ax1, N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', places_binding)
-            plot_gflops(ax1, N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', places_binding)
+            # plot_gflops(ax1, N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', places_binding)
+            # plot_gflops(ax1, N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', places_binding)
+            #
+            # plot_comparison(ax2, N['mkl'], REL, 'mkl-oblas', places_binding)
 
-            plot_comparison(ax2, N['mkl'], REL, 'mkl-oblas', places_binding)
+            plot_gflops(ax1[i], N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', places_binding)
+            plot_gflops(ax1[i], N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', places_binding)
 
-            # plot_gflops(ax1[i], N['mkl'], G['mkl'], ERR_G['mkl'], cores['mkl'], 'mkl', places_binding)
-            # plot_gflops(ax1[i], N['oblas'], G['oblas'], ERR_G['oblas'], cores['oblas'], 'oblas', places_binding)
+            plot_comparison(ax2[i], N['mkl'], REL, 'mkl-oblas', places_binding)
 
-#             plot_comparison(ax2[i], N['mkl'], REL, 'mkl-oblas', places_binding)
+        # ax1.plot([i for i in range(2000, 20001)], [TPP_c for i in range(2000, 20001)], linestyle='--', label='TPP')
+        # ax1.legend()
 
-        ax1.plot([i for i in range(2000, 20001)], [TPP_c for i in range(2000, 20001)], linestyle='--', label='TPP')
-        ax1.legend()
-
-        # ax1[i].plot([i for i in range(2000, 20001)], [TPP_c for i in range(2000, 20001)], linestyle='--', label='TPP')
-        # ax1[i].legend()
+        ax1[i].plot([i for i in range(2000, 20001)], [TPP_c for i in range(2000, 20001)], linestyle='--', label='TPP')
+        ax1[i].legend()
 
         i += 1
 
