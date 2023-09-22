@@ -55,7 +55,7 @@ def plot_weak(N, T, ERR, size, mod):
     for n, t, err in zip(N, T, ERR):
         # ax.plot(N, t)
         ax.errorbar(n, t, err, marker='s', markersize=7.5, linewidth=1.5, elinewidth=2, capsize=0,
-                    label='{} threads'.format(size[count]))
+                    label='{}x{} threads'.format(size[count][0], size[count][1]))
         count += 1
     for tick in ax.get_xticklabels():
         tick.set_rotation(0)
