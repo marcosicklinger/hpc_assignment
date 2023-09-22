@@ -66,46 +66,46 @@ def main():
     parser.add_argument('--prec', type=str, help='precision')
     args = parser.parse_args()
 
-    # places = ['s', 'c', 't']
+    places = ['s', 'c', 't']
+    pbindings = ['s', 'c']
+    pols = ['ss',
+            'sc',
+            'cs',
+            'cc',
+            'ts',
+            'tc']
+    places_binding_dict = {'ss': 'socket/spread',
+                           'sc': 'sockets/close',
+                           'cs': 'cores/spread',
+                           'cc': 'cores/close',
+                           'ts': 'threads/spread',
+                           'tc': 'threads/close'}
+    # places = [
+    #     's',
+    #     'c',
+    #     't'
+    # ]
     # pbindings = ['s', 'c']
-    # pols = ['ss',
-    #         'sc',
-    #         'cs',
-    #         'cc',
-    #         'ts',
-    #         'tc']
-    # places_binding_dict = {'ss': 'socket/spread',
-    #                        'sc': 'sockets/close',
-    #                        'cs': 'cores/spread',
-    #                        'cc': 'cores/close',
-    #                        'ts': 'threads/spread',
-    #                        'tc': 'threads/close'}
-    places = [
-        # 's',
-        'c',
-        # 't'
-    ]
-    pbindings = ['ss', 'cs']
-    pols = ['sss',
-            'scs',
-            'css',
-            'ccs',
-            'tss',
-            'tcs']
-    places_binding_dict = {
-       #  'ss': 'socket/spread',
-       # 'sc': 'sockets/close',
-       'css': 'cores/spread',
-       'ccs': 'cores/close',
-       # 'ts': 'threads/spread',
-       # 'tc': 'threads/close'
-    }
-    fig1, ax1 = plt.subplots(1, 1, figsize=(9, 5))
-    fig2, ax2 = plt.subplots(1, 1, figsize=(9, 5))
+    # pols = ['sss',
+    #         'scs',
+    #         'css',
+    #         'ccs',
+    #         'tss',
+    #         'tcs']
+    # places_binding_dict = {
+    #     'ss': 'socket/spread',
+    #    'sc': 'sockets/close',
+    #    'cs': 'cores/spread',
+    #    'cc': 'cores/close',
+    #    'ts': 'threads/spread',
+    #    'tc': 'threads/close'
+    # }
+    fig1, ax1 = plt.subplots(1, 3, figsize=(15, 4.5))
+    fig2, ax2 = plt.subplots(1, 3, figsize=(15, 4.5))
     i = 0
 
     # TPP_c = 2662.4/64
-    TPP_c = 83.2
+    TPP_c = 41.6
     if args.prec == 'single': TPP_c *= 2
     for place in places:
         for pb in pbindings:
@@ -144,24 +144,24 @@ def main():
 
                 REL += [(s_mean_mkl - s_mean_oblas) / s_mean_oblas]
 
-            # plot_speedup(ax1[i], N['mkl'], S['mkl'], ERR_S['mkl'], size['mkl'], 'mkl', places_binding)
-            # plot_speedup(ax1[i], N['oblas'], S['oblas'], ERR_S['oblas'], size['oblas'], 'oblas', places_binding)
+            plot_speedup(ax1[i], N['mkl'], S['mkl'], ERR_S['mkl'], size['mkl'], 'mkl', places_binding)
+            plot_speedup(ax1[i], N['oblas'], S['oblas'], ERR_S['oblas'], size['oblas'], 'oblas', places_binding)
+
+            plot_comparison(ax2[i], N['mkl'], REL, 'mkl-oblas', places_binding)
+
+            # plot_speedup(ax1, N['mkl'], S['mkl'], ERR_S['mkl'], size['mkl'], 'mkl', places_binding)
+            # plot_speedup(ax1, N['oblas'], S['oblas'], ERR_S['oblas'], size['oblas'], 'oblas', places_binding)
             #
-            # plot_comparison(ax2[i], N['mkl'], REL, 'mkl-oblas', places_binding)
+            # plot_comparison(ax2, N['mkl'], REL, 'mkl-oblas', places_binding)
 
-            plot_speedup(ax1, N['mkl'], S['mkl'], ERR_S['mkl'], size['mkl'], 'mkl', places_binding)
-            plot_speedup(ax1, N['oblas'], S['oblas'], ERR_S['oblas'], size['oblas'], 'oblas', places_binding)
+        ax1[i].plot([i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
+                   [i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
+                   color='red', label='linear', linestyle='dashed')
+        ax1[i].plot([i for i in range(1, 64)], [TPP_c * i for i in range(1, 64)], linestyle='--', label='TPP')
+        ax1[i].legend()
 
-            plot_comparison(ax2, N['mkl'], REL, 'mkl-oblas', places_binding)
-
-        # ax1[i].plot([i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
-        #            [i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
-        #            color='red', label='linear', linestyle='dashed')
-        # ax1[i].plot([i for i in range(1, 64)], [TPP_c * i for i in range(1, 64)], linestyle='--', label='TPP')
-        # ax1[i].legend()
-
-        ax1.plot([i for i in range(1, 13)], [TPP_c * i for i in range(1, 13)], linestyle='--', label='TPP')
-        ax1.legend()
+        ax1[i].plot([i for i in range(1, 13)], [TPP_c * i for i in range(1, 13)], linestyle='--', label='TPP')
+        ax1[i].legend()
 
         i += 1
     fig1.text(0.5, 1 - 0.08, 'cores', ha='center', fontsize=14)
