@@ -54,7 +54,7 @@ The make file contains a few applications useful to set upe the directory:
 #### Compiling the program
 Using the command `srun -n 1 make game SAVINGFLAGS=opt` (in the `exercise_1` directory) will create a game executable in `src/exe`. It makes use of the application `src/exe/game.x` which directly compiles the code with the needed libraries and flags; `opt` takes the following values:
 - `"-DTSAVE"`: directive for saving time measurements;
-- `"-DSSAVE"`: directive for saving life's snapshots at a given frequency.
+- `"-DSSAVE"`: directive for saving life's snapshots at a given frequency (if this flag is not provided, the system is saved only at the end of the evolution).
 
 #### Running the program
 In order to run the program, use a command of the type: `mpirun <options> src/exe/game.x -e evolution -i -r -h height -w width -n time -s save` (in the `exercise_1` directory), where:
