@@ -5,7 +5,6 @@
 #SBATCH --partition=THIN
 #SBATCH --nodes=1
 #SBATCH --exclusive
-#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
 #SBATCH --time=02:00:00
 
