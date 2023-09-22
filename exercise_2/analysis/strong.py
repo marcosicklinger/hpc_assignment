@@ -154,13 +154,7 @@ def main():
             #
             # plot_comparison(ax2, N['mkl'], REL, 'mkl-oblas', places_binding)
 
-        ax1[i].plot([i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
-                   [i for i in range(1, np.max([N[key] for key in N.keys()]) + 1)],
-                   color='red', label='linear', linestyle='dashed')
         ax1[i].plot([i for i in range(1, 64)], [TPP_c * i for i in range(1, 64)], linestyle='--', label='TPP')
-        ax1[i].legend()
-
-        ax1[i].plot([i for i in range(1, 13)], [TPP_c * i for i in range(1, 13)], linestyle='--', label='TPP')
         ax1[i].legend()
 
         i += 1
