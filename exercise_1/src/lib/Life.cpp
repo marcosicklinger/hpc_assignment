@@ -44,7 +44,9 @@ lifeSize(_rows*_cols) {
     int *send_counts = nullptr;
     int *displs = nullptr;
 
-    // master process computes chunks' information to send
+    // master process computes information
+    // needed to send the right chunk of grid to
+    // send to the right process
     // to the other processes
     if (rank == 0) {
         globalState = new int[rows*cols];
@@ -156,6 +158,9 @@ void Life::freezeGlobalState(int &age) {
     int *recv_counts = nullptr;
     int *displs = nullptr;
 
+    // master process sets up the quantities
+    // and the necessary to receive the local grids
+    // in the right place in globalState
     if (rank == 0) {
         globalState = new int[rows*cols];
         recv_counts = new int[nTasks];
@@ -169,6 +174,7 @@ void Life::freezeGlobalState(int &age) {
         }
     }
 
+    // gather local grids in global buffer on master process
     MPI_Gatherv(localState, localSize,
                 MPI_INT,
                 globalState, recv_counts, displs,
