@@ -86,12 +86,6 @@ def main():
     #     't'
     # ]
     # pbindings = ['s', 'c']
-    # pols = ['sss',
-    #         'scs',
-    #         'css',
-    #         'ccs',
-    #         'tss',
-    #         'tcs']
     # places_binding_dict = {
     #     'ss': 'socket/spread',
     #    'sc': 'sockets/close',
