@@ -45,8 +45,8 @@ lifeSize(_rows*_cols) {
     int *displs = nullptr;
 
     // master process computes information
-    // needed to send the right chunk of grid to
-    // send to the right process
+    // needed to send the right chunk of grid
+    // to the right process
     // to the other processes
     if (rank == 0) {
         globalState = new int[rows*cols];
