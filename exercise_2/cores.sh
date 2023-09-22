@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name="e2scs"
-#SBATCH --output="e2.out"
+#SBATCH --output="cores.out"
 #SBATCH --partition=THIN
 #SBATCH --nodes=1
 #SBATCH --exclusive

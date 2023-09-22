@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name="e2csw"
-#SBATCH --output="log.out"
+#SBATCH --output="sizes.out"
 #SBATCH --partition=EPYC
 #SBATCH --nodes=1
 #SBATCH --exclusive
