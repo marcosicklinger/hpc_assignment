@@ -105,7 +105,7 @@ def main():
     i = 0
 
     # TPP_c = 2662.4/64
-    TPP_c = 83.4
+    TPP_c = 83.2
     if args.prec == 'single': TPP_c *= 2
     for place in places:
         for pb in pbindings:
