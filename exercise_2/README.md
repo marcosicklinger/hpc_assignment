@@ -5,14 +5,25 @@ The second exercise directory possesses the following structure:
 ├── analysis
 │   ├── cores.py
 │   └── sizes.py
+├── data
+│   ├── core_scaling
+│   └── size_scaling
 ├── gemm.c
 ├── gemm.cpp
 ├── Makefile
 ├── cores.sh
 └── sizes.sh
 ``` 
-Four files, one makefile, 2 bash scripts (see explanation below) and two C/C++ files, are located right in the first level of the directory.\
+Five files, one makefile, two bash scripts (see explanation below) and two C/C++ files, are located right in the first level of the directory.\
 The `analysis` directory contains python scripts for graphical analysis of the data.
+
+The data are contained in the `data` directory, with `core_scaling` and `size_scaling` sub-directories. Data are named as:
+- `cc`: places: cores, policy: close
+- `cs`: places: cores, policy: spread
+- `sc`: places: sockets, policy: close
+- `ss`: places: sockets, policy: spread
+- `tc`: places: cores, policy: close
+- `ts`: places: threads, policy: spread
 
 ### Specifics
 

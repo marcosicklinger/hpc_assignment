@@ -6,6 +6,7 @@
 The structure of the first exercise's directory is the following:
 ```angular2html
 ├── Makefile
+├── data
 ├── mpiscal.sh
 ├── ompscal.sh
 ├── ordered.sh
@@ -23,11 +24,15 @@ The structure of the first exercise's directory is the following:
         ├── Life.cpp
         └── utils.cpp
 ```
-Four files, one makefile and three bash scripts (see explanation below), are located right in the first level of the directory.\
+Four files, one makefile and four bash scripts (see explanation below), are located right in the first level of the directory.\
 The `src` subdirectory contains the core of the application:
 - `include`: contains the needed header files. These are `consts.h`, in which constants whose value is known at compile time are defined, `utils.h`, containing utility methods, and `Life.h`, where the class representing the Game of Life is declared;
 - `lib`: stores the implementation of the utility methods declared in `utils.h`, and the implementation of the `Life` class methods;
 - `app`: contains the `main` and additional python files for plotting; `graph.py` is needed for plotting relevant graphs regarding the performance analysis, while `life.py` and `story.py` are utilized to plot a life snapshot and simulating an entire life story, respectively.
+
+The `data` directory contains the data used for the plot in the report:
+- `nth`: stands for "number of threads";
+- `s`: stands for "saving frequency"; `sL` files contain runs with one saving at the end; `s25` files contain runs with one saving every 25 iterations. 
 
 ### Specifics
 

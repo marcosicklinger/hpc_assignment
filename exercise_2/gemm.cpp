@@ -34,8 +34,8 @@
 #endif
 
 #ifdef USE_DOUBLE
-#define MYFLOAT double
-#define DATATYPE // printf(" Using double \n\n");
+#define MYFLOAT core_scaling
+#define DATATYPE // printf(" Using core_scaling \n\n");
 #define GEMMCPU cblas_dgemm
 #endif
 

@@ -55,7 +55,7 @@ def main():
     TPP = 0
     if args.prec == 'single':
         TPP = 5324.8
-    if args.prec == 'double':
+    if args.prec == 'core_scaling':
         TPP = 2662.4
 
     # places = [
